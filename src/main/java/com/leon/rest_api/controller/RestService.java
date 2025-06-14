@@ -1,17 +1,28 @@
 package com.leon.rest_api.controller;
 
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
+import java.util.Map;
+
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
-@Scope("prototype")
+import com.leon.rest_api.utils.CommonHashMap;
+
+
 public abstract class RestService {
-
-	@Transactional
-	public String serve() {
-		return executeProcess();
+	
+	public CommonHashMap outputObj = new CommonHashMap();
+	public CommonHashMap inputObj = new CommonHashMap();
+	public void setInput(Map<String, Object> i) throws Exception{
+		inputObj.setHmap(i);
 	}
+	@Transactional
+	public CommonHashMap run() throws Exception{
+		 executeProcess();
+		 return outputObj;
+	}
+	
 
-	abstract public String executeProcess();
+
+	abstract public void executeProcess() throws Exception;
+	abstract public Class<?> getDtoClass(String i);
+
 }
