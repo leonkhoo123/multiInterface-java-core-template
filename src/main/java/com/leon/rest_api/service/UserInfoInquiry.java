@@ -1,37 +1,37 @@
 package com.leon.rest_api.service;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.leon.rest_api.controller.RestService;
+import com.leon.rest_api.dto.UserInfoInquiryDTOInput;
+import com.leon.rest_api.dto.UserInfoInquiryDTOOutput;
 import com.leon.rest_api.entities.UserInfo;
 import com.leon.rest_api.repository.UserInfoRepository;
-import com.leon.rest_api.dto.UserInfoDTOInput;
-import com.leon.rest_api.dto.UserInfoDTOOutput;
+import com.leon.rest_api.utils.CommonApiUtils;
 
-@Service("userInfo")
-public class A16001_UserInfo extends RestService {
 
-	public A16001_UserInfo(UserInfoRepository userInfoRepository) {
+@Service("userInfoInquiry")
+public class UserInfoInquiry extends CommonApiUtils<UserInfoInquiryDTOInput> {
+
+	private UserInfoRepository userInfoRepository;
+
+	public UserInfoInquiry(UserInfoRepository userInfoRepository) {
 		this.userInfoRepository = userInfoRepository;
 	}
 	
 	@Override
 	public Class<?> getDtoClass(String t) {
 	    if (t.equalsIgnoreCase("i")) {
-	        return UserInfoDTOInput.class;
+	        return UserInfoInquiryDTOInput.class;
 	    } else {
-	        return UserInfoDTOOutput.class;
+	        return UserInfoInquiryDTOOutput.class;
 	    }
 	}
 
-	private UserInfoRepository userInfoRepository;
-
 	public void executeProcess() throws Exception{
 		// query something
-		Optional<UserInfo> result = userInfoRepository.findByUserId(inputObj.getBigDecimal("USERID"));
+		Optional<UserInfo> result = userInfoRepository.findByUserId(input.USERID);
 		if (!result.isPresent()) {
 			throw new Exception("Data Not Found");
 		}
