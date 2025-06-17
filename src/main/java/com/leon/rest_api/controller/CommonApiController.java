@@ -34,9 +34,8 @@ public class CommonApiController {
             Class<?> outputDtoClass = api.getDtoClass("o");
             Object outputDto = mapper.convertValue(output, outputDtoClass);
             
-            return outputDto;
+            return populateDefaults(outputDto);
         } catch (Exception e) {
-			// TODO Auto-generated catch block
         	e.printStackTrace();
 			return "Error : " + e.getMessage();
 		}

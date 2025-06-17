@@ -27,16 +27,16 @@ public class CommonHashMap {
                 String fieldName = field.getName();
 
                 if (value != null) {
-                    commonHmap.put(fieldName, value);
+                    commonHmap.put(fieldName.toUpperCase(), value);
                 } else {
                     Class<?> type = field.getType();
 
                     if (type == String.class) {
-                        commonHmap.put(fieldName, "");
+                        commonHmap.put(fieldName.toUpperCase(), "");
                     } else if (type == BigDecimal.class) {
-                        commonHmap.put(fieldName, BigDecimal.ZERO);
+                        commonHmap.put(fieldName.toUpperCase(), BigDecimal.ZERO);
                     } else {
-                        commonHmap.put(fieldName, null); // fallback for other types
+                        commonHmap.put(fieldName.toUpperCase(), null); // fallback for other types
                     }
                 }
             } catch (IllegalAccessException e) {
