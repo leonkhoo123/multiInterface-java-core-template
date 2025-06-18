@@ -4,64 +4,56 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.HashMap;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.leon.rest_api.service.UserInfoInquiry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 public class CommonApiController {
+	private static final Logger logger = LoggerFactory.getLogger(CommonApiController.class);
 
-    @Autowired
-    private ApplicationContext context;
-    
-    @Autowired
-    private ObjectMapper mapper;
+	@Autowired
+	private ControllerService controllerService;
 
-    @RequestMapping("/{processName}")
-    public Object serve(@PathVariable String processName,@RequestBody String input) {
-        try {
-            RestService api = (RestService) context.getBean(processName);
-            Class<?> dtoClass = api.getDtoClass("i");     
-            Object dtoObj = mapper.readValue(input, dtoClass);        
-            api.setInput(populateDefaults(dtoObj));
-            
-            HashMap<String,Object> output = api.run().getHmap();
-            Class<?> outputDtoClass = api.getDtoClass("o");
-            Object outputDto = mapper.convertValue(output, outputDtoClass);
-            
-            return populateDefaults(outputDto);
-        } catch (Exception e) {
-        	e.printStackTrace();
-			return "Error : " + e.getMessage();
+	@PostMapping("/{processName}")
+	public Object apiHandler(@PathVariable String processName, @RequestBody String input) {
+		long startTime = System.currentTimeMillis();  // start timer
+		logger.info("Received: {} request, with input: {}", processName, input);
+
+		Object result = controllerService.serve(processName, input);
+
+		long endTime = System.currentTimeMillis();    // end timer
+		long elapsed = endTime - startTime;
+		logger.info("Process [{}] completed, Elapsed: [{}ms]", processName, elapsed);
+		return result;
+	}
+
+	@KafkaListener(topics = "api-service", groupId = "api-service-group")
+	public void kafkaConsumer(String message) {
+		try {
+			long startTime = System.currentTimeMillis();  // start timer
+			logger.info("Received from Topic: [api-service] Kafka message: {}", message);
+			ObjectMapper objectMapper = new ObjectMapper(); // add this line
+			JsonNode node = objectMapper.readTree(message);
+			String processName = node.get("processName").asText();
+			String input = node.get("input").toString(); // raw JSON string
+
+			Object result = controllerService.serve(processName, input);
+
+			long endTime = System.currentTimeMillis();    // end timer
+			long elapsed = endTime - startTime;
+			logger.info("Kafka processing for ProcessName: [{}] completed, Elapsed: [{}ms]", processName, elapsed);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-    }
-    
-    public static Object populateDefaults(Object dto) {
-		for (Field field : dto.getClass().getDeclaredFields()) {
-			try {
-				field.setAccessible(true);
-				Object value = field.get(dto);
-
-				if (value == null) {
-					if (field.getType().equals(String.class)) {
-						field.set(dto, "");
-					} else if (field.getType().equals(BigDecimal.class)) {
-						field.set(dto, BigDecimal.ZERO);
-					}
-				}
-
-			} catch (IllegalAccessException e) {
-				// Optional: log or rethrow
-				e.printStackTrace();
-			}
-		}
-		
-		return dto;
 	}
 }
 
