@@ -59,5 +59,12 @@ Planned enhancements to make `multiInterface-java-core` more powerful and produc
 
 ---
 
+### 🗃️ Database Migration
+* **Flyway Integration
+  Integrate Flyway to handle automated execution of SQL scripts, ensuring consistent and versioned schema evolution across environments.
+  Organize migration scripts in a modular way by feature or module.
+
+---
+
 
 
