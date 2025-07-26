@@ -37,8 +37,8 @@ public class UserInfoInquiry extends CommonApiUtils<UserInfoInquiryDTOInput> {
 		logger.info("Do something with USERID :"+input.USERID);
 		Optional<UserInfo> result = userInfoRepository.findByUserId(input.USERID);
 		if (!result.isPresent()) {
+			logger.info("Data Not Found");
 			throw new Exception("Data Not Found");
-//			logger.info("Data Not Found");
 		}
 		UserInfo temp = new UserInfo();
 		temp = result.get();

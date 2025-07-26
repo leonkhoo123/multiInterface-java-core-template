@@ -5,11 +5,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 public class CommonApiController {
@@ -18,17 +24,24 @@ public class CommonApiController {
 	@Autowired
 	private ControllerService controllerService;
 
-	@PostMapping("/{processName}")
-	public Object apiHandler(@PathVariable String processName, @RequestBody String input) {
+	@PostMapping(value = "/{processName}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> apiHandler(@PathVariable String processName, @RequestBody String input) {
 		long startTime = System.currentTimeMillis();  // start timer
 		logger.info("Received: {} request, with input: {}", processName, input);
+		Object result = null;
+		HttpStatus status = HttpStatus.OK;
 
-		Object result = controllerService.serve(processName, input);
-
-		long endTime = System.currentTimeMillis();    // end timer
-		long elapsed = endTime - startTime;
-		logger.info("Process [{}] completed, Elapsed: [{}ms]", processName, elapsed);
-		return result;
+		try{
+			result = controllerService.serve(processName, input);
+			return ResponseEntity.ok(result);
+		}catch (Exception e){
+			result = Map.of("error", e.getMessage());
+			status = HttpStatus.BAD_REQUEST;
+			return ResponseEntity.status(status).body(result);
+		} finally {
+			long elapsed = System.currentTimeMillis() - startTime;
+			logger.info("Process [{}] completed with status [{}], Result: {}, Elapsed: [{}ms]",
+					processName, status, result, elapsed);		}
 	}
 
 	@KafkaListener(topics = "api-service", groupId = "api-service-group")

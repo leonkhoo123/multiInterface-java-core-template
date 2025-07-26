@@ -5,12 +5,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class ControllerService {
@@ -22,21 +25,16 @@ public class ControllerService {
     @Autowired
     private ObjectMapper mapper;
 
-    public Object serve(String processName,String input) {
-        try {
-            RestService api = (RestService) context.getBean(processName);
-            Class<?> dtoClass = api.getDtoClass("i");
-            Object dtoObj = mapper.readValue(input, dtoClass);
-            api.setInput(populateDefaults(dtoObj));
+    public Object serve(String processName, String input) throws Exception {
+        RestService api = (RestService) context.getBean(processName);
+        Class<?> dtoClass = api.getDtoClass("i");
+        Object dtoObj = mapper.readValue(input, dtoClass);
+        api.setInput(populateDefaults(dtoObj));
 
-            HashMap<String,Object> output = api.run().getHmap();
-            Class<?> outputDtoClass = api.getDtoClass("o");
-            Object outputDto = mapper.convertValue(output, outputDtoClass);
-            return populateDefaults(outputDto);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Error : " + e.getMessage();
-        }
+        HashMap<String, Object> output = api.run().getHmap();
+        Class<?> outputDtoClass = api.getDtoClass("o");
+        Object outputDto = mapper.convertValue(output, outputDtoClass);
+        return populateDefaults(outputDto);
     }
 
     public static Object populateDefaults(Object dto) {
@@ -52,13 +50,11 @@ public class ControllerService {
                         field.set(dto, BigDecimal.ZERO);
                     }
                 }
-
             } catch (IllegalAccessException e) {
                 // Optional: log or rethrow
                 e.printStackTrace();
             }
         }
-
         return dto;
     }
 }
