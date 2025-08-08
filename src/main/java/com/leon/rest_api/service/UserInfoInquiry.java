@@ -1,5 +1,6 @@
 package com.leon.rest_api.service;
 
+import com.leon.rest_api.PrototypeService;
 import com.leon.rest_api.dto.UserInfoInquiryDTOInput;
 import com.leon.rest_api.dto.UserInfoInquiryDTOOutput;
 import com.leon.rest_api.service.ob.UserInfoInquiryOB;
@@ -10,7 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 
-@Service("userInfoInquiry")
+//@Service("userInfoInquiry")
+@PrototypeService("userInfoInquiry")
 public class UserInfoInquiry extends CommonApiUtils<UserInfoInquiryDTOInput> {
 	private static final Logger logger = LoggerFactory.getLogger(UserInfoInquiry.class);
 

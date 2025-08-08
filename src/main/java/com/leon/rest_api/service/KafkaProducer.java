@@ -1,5 +1,6 @@
 package com.leon.rest_api.service;
 
+import com.leon.rest_api.PrototypeService;
 import com.leon.rest_api.controller.RestService;
 import com.leon.rest_api.dto.UserInfoInquiryDTOInput;
 import org.slf4j.Logger;
@@ -8,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-@Service("kafkaProducer")
+@PrototypeService("kafkaProducer")
 public class KafkaProducer extends RestService {
 	private static final Logger logger = LoggerFactory.getLogger(KafkaProducer.class);
 
