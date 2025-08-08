@@ -1,9 +1,8 @@
 package com.leon.rest_api.controller;
 
+import com.leon.rest_api.utils.CommonHashMap;
 import org.springframework.context.annotation.Scope;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.leon.rest_api.utils.CommonHashMap;
 
 @Scope("prototype")
 public abstract class RestService{

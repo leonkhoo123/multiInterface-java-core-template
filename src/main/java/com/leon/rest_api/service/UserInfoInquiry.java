@@ -1,26 +1,25 @@
 package com.leon.rest_api.service;
 
-import java.util.Optional;
-
+import com.leon.rest_api.dto.UserInfoInquiryDTOInput;
+import com.leon.rest_api.dto.UserInfoInquiryDTOOutput;
+import com.leon.rest_api.service.ob.UserInfoInquiryOB;
+import com.leon.rest_api.service.ob.UserInfoInquiryRepos;
+import com.leon.rest_api.utils.CommonApiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import com.leon.rest_api.dto.UserInfoInquiryDTOInput;
-import com.leon.rest_api.dto.UserInfoInquiryDTOOutput;
-import com.leon.rest_api.entities.UserInfo;
-import com.leon.rest_api.repository.UserInfoRepository;
-import com.leon.rest_api.utils.CommonApiUtils;
 
 
 @Service("userInfoInquiry")
 public class UserInfoInquiry extends CommonApiUtils<UserInfoInquiryDTOInput> {
 	private static final Logger logger = LoggerFactory.getLogger(UserInfoInquiry.class);
 
-	private UserInfoRepository userInfoRepository;
+	private final UserInfoInquiryRepos repo;
+	private UserInfoInquiryOB OB;
 
-	public UserInfoInquiry(UserInfoRepository userInfoRepository) {
-		this.userInfoRepository = userInfoRepository;
+	public UserInfoInquiry(UserInfoInquiryRepos repo) {
+		this.repo = repo;
+		OB = repo.createOB();
 	}
 	
 	@Override
@@ -34,17 +33,8 @@ public class UserInfoInquiry extends CommonApiUtils<UserInfoInquiryDTOInput> {
 
 	public void executeProcess() throws Exception{
 		// query something
-		logger.info("Do something with USERID :"+input.USERID);
-		Optional<UserInfo> result = userInfoRepository.findByUserId(input.USERID);
-		if (!result.isPresent()) {
-			logger.info("Data Not Found");
-			throw new Exception("Data Not Found");
-		}
-		UserInfo temp = new UserInfo();
-		temp = result.get();
-		outputObj.setHmap(temp);
-		logger.info("Api Done output: "+outputObj);
-
+        logger.info("Do something with USERID :{}", input.USERID);
+		outputObj.setHmap(OB.getUserInfo(input.USERID));
+        logger.info("Api Done output: {}", outputObj);
 	}
-
 }

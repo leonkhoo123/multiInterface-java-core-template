@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import com.leon.rest_api.controller.RestService;
 
 @Component
-@Scope("prototype")
 public abstract class CommonApiUtils<I> extends RestService{
 	
 	protected I input;
