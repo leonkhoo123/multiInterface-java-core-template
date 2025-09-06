@@ -34,6 +34,20 @@ public class ControllerService {
         return CommonDTOUtils.populateDefaults(outputDto);
     }
 
+    public Object postAuthServe(String processName, Map<String, Object> input) throws Exception {
+        PostService api = (PostService) context.getBean(processName);
+        Class<?> inputDtoClass = api.getDtoClass(PostService.dto.INPUT);
+
+        // Convert the generic Map directly into DTO
+        Object inputDtoObj = mapper.convertValue(input, inputDtoClass);
+        api.setInput(CommonDTOUtils.populateDefaults(inputDtoObj));
+
+        HashMap<String, Object> output = api.run().getHmap();
+        Class<?> outputDtoClass = api.getDtoClass(PostService.dto.OUTPUT);
+        Object outputDto = mapper.convertValue(output, outputDtoClass);
+
+        return CommonDTOUtils.populateDefaults(outputDto);
+    }
 
     public Object getServe(String processName, Map<String, String> params) throws Exception {
         GetService api = (GetService) context.getBean(processName);
