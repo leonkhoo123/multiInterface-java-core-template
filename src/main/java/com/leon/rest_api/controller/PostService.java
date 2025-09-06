@@ -1,12 +1,15 @@
 package com.leon.rest_api.controller;
 
 import com.leon.rest_api.utils.CommonHashMap;
-import org.springframework.context.annotation.Scope;
 import org.springframework.transaction.annotation.Transactional;
 
-public abstract class RestService{
+public abstract class PostService {
 
 	public CommonHashMap outputObj = new CommonHashMap();
+	public enum dto {
+		INPUT,
+		OUTPUT
+	}
 
 	@Transactional
 	public CommonHashMap run() throws Exception {
@@ -16,6 +19,6 @@ public abstract class RestService{
 
 	abstract public void setInput(Object obj) throws Exception;
 	abstract public void executeProcess() throws Exception;
-	abstract public Class<?> getDtoClass(String i);
+	abstract public Class<?> getDtoClass(Enum i);
 
 }

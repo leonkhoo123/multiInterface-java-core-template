@@ -1,17 +1,13 @@
 package com.leon.rest_api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.leon.rest_api.utils.DTOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PostMapping;
 
-import java.lang.reflect.Field;
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,37 +21,37 @@ public class ControllerService {
     @Autowired
     private ObjectMapper mapper;
 
-    public Object serve(String processName, String input) throws Exception {
-        RestService api = (RestService) context.getBean(processName);
-        Class<?> dtoClass = api.getDtoClass("i");
-        Object dtoObj = mapper.readValue(input, dtoClass);
-        api.setInput(populateDefaults(dtoObj));
+    public Object postServe(String processName, Map<String, Object> input) throws Exception {
+        PostService api = (PostService) context.getBean(processName);
+        Class<?> inputDtoClass = api.getDtoClass(PostService.dto.INPUT);
+
+        // Convert the generic Map directly into DTO
+        Object inputDtoObj = mapper.convertValue(input, inputDtoClass);
+        api.setInput(DTOUtils.populateDefaults(inputDtoObj));
 
         HashMap<String, Object> output = api.run().getHmap();
-        Class<?> outputDtoClass = api.getDtoClass("o");
+        Class<?> outputDtoClass = api.getDtoClass(PostService.dto.OUTPUT);
         Object outputDto = mapper.convertValue(output, outputDtoClass);
-        return populateDefaults(outputDto);
+
+        return DTOUtils.populateDefaults(outputDto);
     }
 
-    public static Object populateDefaults(Object dto) {
-        for (Field field : dto.getClass().getDeclaredFields()) {
-            try {
-                field.setAccessible(true);
-                Object value = field.get(dto);
 
-                if (value == null) {
-                    if (field.getType().equals(String.class)) {
-                        field.set(dto, "");
-                    } else if (field.getType().equals(BigDecimal.class)) {
-                        field.set(dto, BigDecimal.ZERO);
-                    }
-                }
-            } catch (IllegalAccessException e) {
-                // Optional: log or rethrow
-                e.printStackTrace();
-            }
-        }
-        return dto;
+    public Object getServe(String processName, Map<String, String> params) throws Exception {
+        GetService api = (GetService) context.getBean(processName);
+        Class<?> inputDtoClass = api.getDtoClass(GetService.dto.INPUT);
+        // Convert query params (Map<String, String>) into input DTO
+        Object inputDtoObj = mapper.convertValue(params, DTOUtils.populateDefaults(inputDtoClass));
+
+        HashMap<String, Object> output = api.run(DTOUtils.populateDefaults(inputDtoObj)).getHmap();
+        Class<?> outputDtoClass = api.getDtoClass(GetService.dto.OUTPUT);
+        Object outputDto = mapper.convertValue(output, outputDtoClass);
+
+        return DTOUtils.populateDefaults(outputDto);
+    }
+
+    private static Object getInputDtoObj(Object inputDtoObj) {
+        return inputDtoObj;
     }
 }
 

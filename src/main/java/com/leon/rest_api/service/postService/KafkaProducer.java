@@ -1,16 +1,15 @@
-package com.leon.rest_api.service;
+package com.leon.rest_api.service.postService;
 
 import com.leon.rest_api.PrototypeService;
-import com.leon.rest_api.controller.RestService;
+import com.leon.rest_api.controller.PostService;
 import com.leon.rest_api.dto.UserInfoInquiryDTOInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Service;
 
 @PrototypeService("kafkaProducer")
-public class KafkaProducer extends RestService {
+public class KafkaProducer extends PostService {
 	private static final Logger logger = LoggerFactory.getLogger(KafkaProducer.class);
 
 	@Autowired
@@ -31,7 +30,7 @@ public class KafkaProducer extends RestService {
 	}
 
 	@Override
-	public Class<?> getDtoClass(String i) {
+	public Class<?> getDtoClass(Enum i) {
 		return UserInfoInquiryDTOInput.class;
 	}
 

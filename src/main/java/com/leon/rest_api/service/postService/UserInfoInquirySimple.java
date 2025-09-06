@@ -1,21 +1,20 @@
-package com.leon.rest_api.service;
+package com.leon.rest_api.service.postService;
 
 import com.leon.rest_api.PrototypeService;
 import com.leon.rest_api.dto.UserInfoInquiryDTOInput;
 import com.leon.rest_api.dto.UserInfoInquiryDTOOutput;
 import com.leon.rest_api.entities.UserInfo;
 import com.leon.rest_api.repository.UserInfoRepository;
-import com.leon.rest_api.utils.CommonApiUtils;
+import com.leon.rest_api.utils.PostApiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 
 //@Service("userInfoInquirySimple")
 @PrototypeService("userInfoInquirySimple")
-public class UserInfoInquirySimple extends CommonApiUtils<UserInfoInquiryDTOInput> {
+public class UserInfoInquirySimple extends PostApiUtils<UserInfoInquiryDTOInput> {
 	private static final Logger logger = LoggerFactory.getLogger(UserInfoInquirySimple.class);
 
 	private UserInfoRepository userInfoRepository;
@@ -25,8 +24,8 @@ public class UserInfoInquirySimple extends CommonApiUtils<UserInfoInquiryDTOInpu
 	}
 	
 	@Override
-	public Class<?> getDtoClass(String t) {
-	    if (t.equalsIgnoreCase("i")) {
+	public Class<?> getDtoClass(Enum t) {
+	    if (t == dto.INPUT) {
 	        return UserInfoInquiryDTOInput.class;
 	    } else {
 	        return UserInfoInquiryDTOOutput.class;
