@@ -34,8 +34,8 @@ public class UserInfoInquiry extends PostApiUtils<UserInfoInquiryDTOInput> {
 
 	public void executeProcess() throws Exception{
 		// query something
-        logger.info("Do something with USERID :{}", input.USERID);
+//        logger.info("Do something with USERID :{}", input.USERID);
 		outputObj.setHmap(OB.getUserInfo(input.USERID));
-        logger.info("Api Done output: {}", outputObj);
+//        logger.info("Api Done output: {}", outputObj);
 	}
 }

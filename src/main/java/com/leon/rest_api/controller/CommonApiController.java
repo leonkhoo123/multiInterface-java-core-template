@@ -3,6 +3,7 @@ package com.leon.rest_api.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.leon.rest_api.utils.CommonDTOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class CommonApiController {
 		} finally {
 			long elapsed = System.currentTimeMillis() - startTime;
 			logger.info("Process [{}] completed with status [{}], Result: {}, Elapsed: [{}ms]",
-					processName, status, result, elapsed);
+					processName, status, CommonDTOUtils.toJson(result), elapsed);
 		}
 	}
 
@@ -67,7 +68,7 @@ public class CommonApiController {
 		} finally {
 			long elapsed = System.currentTimeMillis() - startTime;
 			logger.info("Process [{}] completed with status [{}], Result: {}, Elapsed: [{}ms]",
-					processName, status, result, elapsed);
+					processName, status, CommonDTOUtils.toJson(result), elapsed);
 		}
 	}
 

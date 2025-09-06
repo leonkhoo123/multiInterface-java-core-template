@@ -1,9 +1,7 @@
 package com.leon.rest_api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.leon.rest_api.utils.DTOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.leon.rest_api.utils.CommonDTOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -13,7 +11,7 @@ import java.util.Map;
 
 @Component
 public class ControllerService {
-    private static final Logger logger = LoggerFactory.getLogger(ControllerService.class);
+//    private static final Logger logger = LoggerFactory.getLogger(ControllerService.class);
 
     @Autowired
     private ApplicationContext context;
@@ -27,13 +25,13 @@ public class ControllerService {
 
         // Convert the generic Map directly into DTO
         Object inputDtoObj = mapper.convertValue(input, inputDtoClass);
-        api.setInput(DTOUtils.populateDefaults(inputDtoObj));
+        api.setInput(CommonDTOUtils.populateDefaults(inputDtoObj));
 
         HashMap<String, Object> output = api.run().getHmap();
         Class<?> outputDtoClass = api.getDtoClass(PostService.dto.OUTPUT);
         Object outputDto = mapper.convertValue(output, outputDtoClass);
 
-        return DTOUtils.populateDefaults(outputDto);
+        return CommonDTOUtils.populateDefaults(outputDto);
     }
 
 
@@ -41,17 +39,13 @@ public class ControllerService {
         GetService api = (GetService) context.getBean(processName);
         Class<?> inputDtoClass = api.getDtoClass(GetService.dto.INPUT);
         // Convert query params (Map<String, String>) into input DTO
-        Object inputDtoObj = mapper.convertValue(params, DTOUtils.populateDefaults(inputDtoClass));
+        Object inputDtoObj = mapper.convertValue(params, CommonDTOUtils.populateDefaults(inputDtoClass));
 
-        HashMap<String, Object> output = api.run(DTOUtils.populateDefaults(inputDtoObj)).getHmap();
+        HashMap<String, Object> output = api.run(CommonDTOUtils.populateDefaults(inputDtoObj)).getHmap();
         Class<?> outputDtoClass = api.getDtoClass(GetService.dto.OUTPUT);
         Object outputDto = mapper.convertValue(output, outputDtoClass);
 
-        return DTOUtils.populateDefaults(outputDto);
-    }
-
-    private static Object getInputDtoObj(Object inputDtoObj) {
-        return inputDtoObj;
+        return CommonDTOUtils.populateDefaults(outputDto);
     }
 }
 

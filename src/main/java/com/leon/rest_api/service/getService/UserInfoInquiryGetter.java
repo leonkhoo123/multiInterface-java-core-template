@@ -39,7 +39,7 @@ public class UserInfoInquiryGetter extends GetService<UserInfoInquiryDTOInput> {
 		CommonHashMap outputObj = new CommonHashMap();
 
 		// query something
-		logger.info("Do something with USERID : "+input.USERID);
+//		logger.info("Do something with USERID : "+input.USERID);
 		Optional<UserInfo> result = userInfoRepository.findByUserId(input.USERID);
 		if (!result.isPresent()) {
 			logger.info("Data Not Found");
@@ -47,7 +47,7 @@ public class UserInfoInquiryGetter extends GetService<UserInfoInquiryDTOInput> {
 		}
 		UserInfo temp = result.get();
 		outputObj.setHmap(temp);
-		logger.info("Api Done output: "+outputObj);
+//		logger.info("Api Done output: "+outputObj);
 		return outputObj;
 	}
 }

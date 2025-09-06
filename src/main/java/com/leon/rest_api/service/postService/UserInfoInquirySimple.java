@@ -34,7 +34,7 @@ public class UserInfoInquirySimple extends PostApiUtils<UserInfoInquiryDTOInput>
 
 	public void executeProcess() throws Exception{
 		// query something
-		logger.info("Do something with USERID :"+input.USERID);
+//		logger.info("Do something with USERID :"+input.USERID);
 		Optional<UserInfo> result = userInfoRepository.findByUserId(input.USERID);
 		if (!result.isPresent()) {
 			logger.info("Data Not Found");
@@ -43,7 +43,7 @@ public class UserInfoInquirySimple extends PostApiUtils<UserInfoInquiryDTOInput>
 		UserInfo temp = new UserInfo();
 		temp = result.get();
 		outputObj.setHmap(temp);
-		logger.info("Api Done output: "+outputObj);
+//		logger.info("Api Done output: "+outputObj);
 
 	}
 
