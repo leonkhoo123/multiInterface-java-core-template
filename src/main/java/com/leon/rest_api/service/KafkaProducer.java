@@ -1,4 +1,4 @@
-package com.leon.rest_api.service.postService;
+package com.leon.rest_api.service;
 
 import com.leon.rest_api.PrototypeService;
 import com.leon.rest_api.controller.PostService;

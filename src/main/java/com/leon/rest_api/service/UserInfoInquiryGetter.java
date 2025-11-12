@@ -1,4 +1,4 @@
-package com.leon.rest_api.service.getService;
+package com.leon.rest_api.service;
 
 import com.leon.rest_api.controller.GetService;
 import com.leon.rest_api.dto.UserInfoInquiryDTOInput;

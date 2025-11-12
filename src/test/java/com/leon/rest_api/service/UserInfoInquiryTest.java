@@ -3,7 +3,6 @@ package com.leon.rest_api.service;
 import com.leon.rest_api.dto.UserInfoInquiryDTOInput;
 import com.leon.rest_api.entities.UserInfo;
 import com.leon.rest_api.repository.UserInfoRepository;
-import com.leon.rest_api.service.postService.UserInfoInquiry;
 import com.leon.rest_api.utils.CommonHashMap;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
