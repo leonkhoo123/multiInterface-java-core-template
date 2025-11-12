@@ -6,8 +6,6 @@ import com.leon.rest_api.service.UserInfoTest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +16,7 @@ import java.math.BigDecimal;
 @Tag(name = "General usage", description = "General Public APIs")
 public class CommonPublicController {
 
-	private static final Logger log = LoggerFactory.getLogger(CommonPublicController.class);
+//	private static final Logger log = LoggerFactory.getLogger(CommonPublicController.class);
 	private final UserInfoTest userInfoTest;
 
     public CommonPublicController(UserInfoTest userInfoTest) {
@@ -34,14 +32,12 @@ public class CommonPublicController {
 	@PostMapping("/users/info")
 	@Operation(summary = "Get user info by body")
 	public ResponseEntity<UserInfoInquiryDTOOutput> getUserInfo(@Valid @RequestBody UserInfoInquiryDTOInput input) throws Exception {
-		log.info("Fetching info for userId: {}", input.USERID);
 		return ResponseEntity.ok(userInfoTest.executeProcess(input));
 	}
 
 	@GetMapping("/users/{userId}")
 	@Operation(summary = "Get user info by path variable")
 	public ResponseEntity<UserInfoInquiryDTOOutput> getUserById(@PathVariable BigDecimal userId) throws Exception {
-		log.info("Fetching info for userId: {}", userId);
 		UserInfoInquiryDTOInput input = new UserInfoInquiryDTOInput();
 		input.USERID = userId;
 		return ResponseEntity.ok(userInfoTest.executeProcess(input));

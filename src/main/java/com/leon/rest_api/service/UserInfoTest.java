@@ -5,6 +5,7 @@ import com.leon.rest_api.dto.UserInfoInquiryDTOInput;
 import com.leon.rest_api.dto.UserInfoInquiryDTOOutput;
 import com.leon.rest_api.entities.UserInfo;
 import com.leon.rest_api.repository.UserInfoRepository;
+import com.leon.rest_api.utils.DtoUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,8 @@ public class UserInfoTest {
 
 	@Transactional(readOnly = true)
 	public UserInfoInquiryDTOOutput executeProcess(UserInfoInquiryDTOInput input) throws Exception {
+//		input = DtoUtils.cleanDto(input); // assign default value to all column
+
 		logger.info("Processing user info inquiry for userId: {}", input.USERID);
 
 		UserInfo userInfo = userInfoRepository.findByUserId(input.USERID)
@@ -37,6 +40,7 @@ public class UserInfoTest {
 		output.USERNAME = userInfo.getUsername();
 
 		logger.info("Successfully retrieved user info for userId: {}", input.USERID);
+//		return DtoUtils.cleanDto(output);
 		return output;
 	}
 }

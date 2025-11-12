@@ -16,6 +16,7 @@ public class CommonAuthController {
 	public ResponseEntity<?> postHandler(){
 		return ResponseEntity.ok("auth OK");
 	}
+
 }
 
 
