@@ -12,12 +12,15 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
 @Component
 public class HttpLoggingFilter implements Filter {
 
     private static final Logger log = LoggerFactory.getLogger(HttpLoggingFilter.class);
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     @Override
     public void doFilter(jakarta.servlet.ServletRequest request, jakarta.servlet.ServletResponse response,
@@ -33,35 +36,39 @@ public class HttpLoggingFilter implements Filter {
         }
         cachedResponse.setHeader("X-Request-ID", requestId);
 
-        // record start time
-        long startTime = System.currentTimeMillis();
+        long startTime = 0;
 
         try {
+            startTime = logRequest(requestId,cachedRequest);
             chain.doFilter(cachedRequest, cachedResponse);
         } catch (Exception e) {
             log.error("Response error: {} {}", cachedRequest.getMethod(), cachedRequest.getRequestURI(), e);
             throw e;
         } finally {
-            long elapsed = System.currentTimeMillis() - startTime;
-            logRequest(requestId,cachedRequest);
-            logResponse(cachedRequest, cachedResponse,elapsed);
+            logResponse(cachedRequest, cachedResponse, startTime);
             cachedResponse.copyBodyToResponse(); // important: copy response back
         }
     }
 
-    private void logRequest(String requestId, ContentCachingRequestWrapper request) throws IOException {
+    private long logRequest(String requestId, ContentCachingRequestWrapper request) throws IOException {
         String body = new String(request.getContentAsByteArray(), request.getCharacterEncoding());
-        log.debug("\nReceived: {} {} \n[X-Request-ID: {}] \nHeaders:\n{} \nBody: {}",
+        long startTime = System.currentTimeMillis();
+        log.debug("\n[{}] Received: {} {} \nX-Request-ID: {} \nHeaders:\n{} \nBody: {}",
+                sdf.format(new Date(startTime)),
                 request.getMethod(),
                 request.getRequestURL(),
                 requestId,
                 getHeaders(request),
                 body.isEmpty() ? "{}" : body);
+        return startTime;
     }
 
-    private void logResponse(ContentCachingRequestWrapper request, ContentCachingResponseWrapper response, long elapsed) throws IOException {
+    private void logResponse(ContentCachingRequestWrapper request, ContentCachingResponseWrapper response, long startTime) throws IOException {
         String body = new String(response.getContentAsByteArray(), response.getCharacterEncoding());
-        log.debug("\nResponse: {} {} status={} [{}ms] \nHeaders:\n{} \nBody: {}",
+        long endTime = System.currentTimeMillis();
+        long elapsed = endTime - startTime;
+        log.debug("\n[{}] Response: {} {} status={} [{}ms] \nHeaders:\n{} \nBody: {}",
+                sdf.format(new Date(endTime)),
                 request.getMethod(),
                 request.getRequestURL(),
                 response.getStatus(),
