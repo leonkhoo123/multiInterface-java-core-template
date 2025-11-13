@@ -39,8 +39,8 @@ public class HttpLoggingFilter implements Filter {
         long startTime = 0;
 
         try {
-            startTime = logRequest(requestId,cachedRequest);
             chain.doFilter(cachedRequest, cachedResponse);
+            startTime = logRequest(requestId,cachedRequest);
         } catch (Exception e) {
             log.error("Response error: {} {}", cachedRequest.getMethod(), cachedRequest.getRequestURI(), e);
             throw e;
