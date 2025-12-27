@@ -45,7 +45,7 @@ public class HttpLoggingFilter implements Filter {
             log.error("Response error: {} {}", cachedRequest.getMethod(), cachedRequest.getRequestURI(), e);
             throw e;
         } finally {
-            logResponse(cachedRequest, cachedResponse, startTime);
+            logResponse(requestId,cachedRequest, cachedResponse, startTime);
             cachedResponse.copyBodyToResponse(); // important: copy response back
         }
     }
@@ -53,7 +53,7 @@ public class HttpLoggingFilter implements Filter {
     private long logRequest(String requestId, ContentCachingRequestWrapper request) throws IOException {
         String body = new String(request.getContentAsByteArray(), request.getCharacterEncoding());
         long startTime = System.currentTimeMillis();
-        log.debug("\n[{}] Received: {} {} \nX-Request-ID: {} \nHeaders:\n{} \nBody: {}",
+        log.debug("\n[{}] REQUEST: {} [{}] \nX-Request-ID: {} \nHeaders:\n{} \nBody: {}",
                 sdf.format(new Date(startTime)),
                 request.getMethod(),
                 request.getRequestURL(),
@@ -63,11 +63,11 @@ public class HttpLoggingFilter implements Filter {
         return startTime;
     }
 
-    private void logResponse(ContentCachingRequestWrapper request, ContentCachingResponseWrapper response, long startTime) throws IOException {
+    private void logResponse(String requestId, ContentCachingRequestWrapper request, ContentCachingResponseWrapper response, long startTime) throws IOException {
         String body = new String(response.getContentAsByteArray(), response.getCharacterEncoding());
         long endTime = System.currentTimeMillis();
         long elapsed = endTime - startTime;
-        log.debug("\n[{}] Response: {} {} status={} [{}ms] \nHeaders:\n{} \nBody: {}",
+        log.debug("\n[{}] RESPONSE: {} [{}][status={}][{}ms] \nHeaders:\n{} \nBody: {}",
                 sdf.format(new Date(endTime)),
                 request.getMethod(),
                 request.getRequestURL(),
@@ -75,7 +75,7 @@ public class HttpLoggingFilter implements Filter {
                 elapsed,
                 getHeaders(response),
                 body.isEmpty() ? "{}" : body);
-        log.info("{} {} completed, status={} [{}ms]", request.getMethod(), request.getRequestURI(), response.getStatus(),elapsed);
+        log.info("[{}] {} {} completed, status={} [{}ms]", requestId ,request.getMethod(), request.getRequestURI(), response.getStatus(),elapsed);
     }
 
     private String getHeaders(HttpServletRequest request) {

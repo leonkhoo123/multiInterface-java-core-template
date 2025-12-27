@@ -1,20 +1,19 @@
 package com.leon.rest_api.controller;
 
-import com.leon.rest_api.dto.UserInfoInquiryDTOInput;
-import com.leon.rest_api.dto.UserInfoInquiryDTOOutput;
+import com.leon.rest_api.dto.request.UserInfoInquiryRequest;
+import com.leon.rest_api.dto.response.UserInfoInquiryResponse;
+import com.leon.rest_api.dto.response.CommonResponse;
 import com.leon.rest_api.service.UserInfoTest;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
 @RestController
-@RequestMapping("/api/v1")
-@Tag(name = "General usage", description = "General Public APIs")
-public class CommonPublicController {
+public class CommonPublicController implements CommonPublicControllerInterface {
 
 //	private static final Logger log = LoggerFactory.getLogger(CommonPublicController.class);
 	private final UserInfoTest userInfoTest;
@@ -23,23 +22,21 @@ public class CommonPublicController {
         this.userInfoTest = userInfoTest;
     }
 
-    @GetMapping("/test")
-	@Operation(summary = "Health check")
 	public String testEndpoint() {
 		return "OK";
 	}
 
-	@PostMapping("/users/info")
-	@Operation(summary = "Get user info by body")
-	public ResponseEntity<UserInfoInquiryDTOOutput> getUserInfo(@Valid @RequestBody UserInfoInquiryDTOInput input) throws Exception {
-		return ResponseEntity.ok(userInfoTest.executeProcess(input));
+	@Override
+	public ResponseEntity<CommonResponse<UserInfoInquiryResponse>> postUserInfo(@Valid @RequestBody UserInfoInquiryRequest input) throws Exception {
+		UserInfoInquiryResponse output = userInfoTest.executeProcess(input);
+		return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.success("",output));
 	}
 
-	@GetMapping("/users/{userId}")
-	@Operation(summary = "Get user info by path variable")
-	public ResponseEntity<UserInfoInquiryDTOOutput> getUserById(@PathVariable BigDecimal userId) throws Exception {
-		UserInfoInquiryDTOInput input = new UserInfoInquiryDTOInput();
+	@Override
+	public ResponseEntity<CommonResponse<UserInfoInquiryResponse>> getUserById(@PathVariable BigDecimal userId) throws Exception {
+		UserInfoInquiryRequest input = new UserInfoInquiryRequest();
 		input.USERID = userId;
-		return ResponseEntity.ok(userInfoTest.executeProcess(input));
+		UserInfoInquiryResponse output = userInfoTest.executeProcess(input);
+		return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.success("",output));
 	}
 }

@@ -1,11 +1,10 @@
 package com.leon.rest_api.service;
 
-import com.leon.rest_api.Exception.UserNotFoundException;
-import com.leon.rest_api.dto.UserInfoInquiryDTOInput;
-import com.leon.rest_api.dto.UserInfoInquiryDTOOutput;
+import com.leon.rest_api.exception.UserNotFoundException;
+import com.leon.rest_api.dto.request.UserInfoInquiryRequest;
+import com.leon.rest_api.dto.response.UserInfoInquiryResponse;
 import com.leon.rest_api.entities.UserInfo;
 import com.leon.rest_api.repository.UserInfoRepository;
-import com.leon.rest_api.utils.DtoUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,7 @@ public class UserInfoTest {
 	}
 
 	@Transactional(readOnly = true)
-	public UserInfoInquiryDTOOutput executeProcess(UserInfoInquiryDTOInput input) throws Exception {
+	public UserInfoInquiryResponse executeProcess(UserInfoInquiryRequest input) throws Exception {
 //		input = DtoUtils.cleanDto(input); // assign default value to all column
 
 		logger.info("Processing user info inquiry for userId: {}", input.USERID);
@@ -34,7 +33,7 @@ public class UserInfoTest {
 					return new UserNotFoundException("User not found: " + input.USERID);
 				});
 
-		UserInfoInquiryDTOOutput output = new UserInfoInquiryDTOOutput();
+		UserInfoInquiryResponse output = new UserInfoInquiryResponse();
 		output.USERID = userInfo.getUserId();
 		output.BALANCE = userInfo.getBalance();
 		output.USERNAME = userInfo.getUsername();
