@@ -25,20 +25,20 @@ public class UserInfoTest {
 	public UserInfoInquiryResponse executeProcess(UserInfoInquiryRequest input) throws Exception {
 //		input = DtoUtils.cleanDto(input); // assign default value to all column
 
-		logger.info("Processing user info inquiry for userId: {}", input.USERID);
+		logger.info("Processing user info inquiry for userId: {}", input.getUserid());
 
-		UserInfo userInfo = userInfoRepository.findByUserId(input.USERID)
+		UserInfo userInfo = userInfoRepository.findByUserId(input.getUserid())
 				.orElseThrow(() -> {
-					logger.warn("User not found with userId: {}", input.USERID);
-					return new UserNotFoundException("User not found: " + input.USERID);
+					logger.warn("User not found with userId: {}", input.getUserid());
+					return new UserNotFoundException("User not found: " + input.getUserid());
 				});
 
 		UserInfoInquiryResponse output = new UserInfoInquiryResponse();
-		output.USERID = userInfo.getUserId();
-		output.BALANCE = userInfo.getBalance();
-		output.USERNAME = userInfo.getUsername();
+		output.setUserid(userInfo.getUserId());
+		output.setBalance(userInfo.getBalance());
+		output.setUsername(userInfo.getUsername());
 
-		logger.info("Successfully retrieved user info for userId: {}", input.USERID);
+		logger.info("Successfully retrieved user info for userId: {}", input.getUserid());
 //		return DtoUtils.cleanDto(output);
 		return output;
 	}

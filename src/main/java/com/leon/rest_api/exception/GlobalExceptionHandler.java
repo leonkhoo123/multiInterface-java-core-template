@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -73,19 +75,30 @@ public class GlobalExceptionHandler {
 
     // ---------------- Security ----------------
 
-//    @ExceptionHandler(AccessDeniedException.class)
-//    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(
-//            AccessDeniedException e,
-//            HttpServletRequest request
-//    ) {
-//        return ResponseEntity
-//                .status(HttpStatus.UNAUTHORIZED)
-//                .body(ApiResponse.failure(
-//                        "Unauthorized",
-//                        ErrorCode.UNAUTHORIZED.name(),
-//                        traceId(request)
-//                ));
-//    }
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<CommonResponse<Void>> handleAccessDenied(
+            AccessDeniedException e,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(CommonResponse.failure(
+                        "Unauthorized",
+                        ErrorCode.UNAUTHORIZED.name()
+                ));
+    }
+
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<CommonResponse<Void>> handleAuthenticationException(
+            Exception e, HttpServletRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(CommonResponse.failure(
+                        "Authentication failed: " + e.getMessage(),
+                        ErrorCode.UNAUTHORIZED.name()
+                ));
+    }
 
     // ---------------- Fallback ----------------
 
@@ -94,12 +107,7 @@ public class GlobalExceptionHandler {
             Exception e,
             HttpServletRequest request
     ) {
-
-        log.error(
-                "Unhandled exception, traceId={}",
-                traceId(request),
-                e
-        );
+        log.error("Unhandled exception!", e);
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

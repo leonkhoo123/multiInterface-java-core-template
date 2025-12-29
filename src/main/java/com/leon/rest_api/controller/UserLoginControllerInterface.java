@@ -9,10 +9,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/auth")
 @Tag(name = "Login Api", description = "User login management APIs")
 public interface UserLoginControllerInterface {
 
@@ -48,7 +49,7 @@ public interface UserLoginControllerInterface {
     })
     @PostMapping("/login")
     ResponseEntity<CommonResponse<LoginResponse>> login(
-            @RequestBody LoginRequest request
+            LoginRequest request, HttpServletResponse response
     );
 
     // -------------------- LOGOUT --------------------
@@ -76,6 +77,6 @@ public interface UserLoginControllerInterface {
     })
     @PostMapping("/logout")
     ResponseEntity<CommonResponse<LogoutResponse>> logout(
-            @RequestHeader("Authorization") String authorization
+            String authorization, HttpServletResponse response
     );
 }

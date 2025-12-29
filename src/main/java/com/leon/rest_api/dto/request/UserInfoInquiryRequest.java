@@ -4,5 +4,17 @@ import java.math.BigDecimal;
 
 
 public class UserInfoInquiryRequest {
-	public BigDecimal USERID;
+	private BigDecimal userid;
+
+	public UserInfoInquiryRequest(BigDecimal userid) {
+		this.userid = userid;
+	}
+
+	public BigDecimal getUserid() {
+		return userid;
+	}
+
+	public void setUserid(BigDecimal userid) {
+		this.userid = userid;
+	}
 }

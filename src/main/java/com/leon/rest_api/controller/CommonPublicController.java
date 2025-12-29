@@ -34,8 +34,7 @@ public class CommonPublicController implements CommonPublicControllerInterface {
 
 	@Override
 	public ResponseEntity<CommonResponse<UserInfoInquiryResponse>> getUserById(@PathVariable BigDecimal userId) throws Exception {
-		UserInfoInquiryRequest input = new UserInfoInquiryRequest();
-		input.USERID = userId;
+		UserInfoInquiryRequest input = new UserInfoInquiryRequest(userId);
 		UserInfoInquiryResponse output = userInfoTest.executeProcess(input);
 		return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.success("",output));
 	}

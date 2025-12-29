@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/")
 @Tag(name = "General usage", description = "General Public APIs")
 public interface CommonPublicControllerInterface {
 
