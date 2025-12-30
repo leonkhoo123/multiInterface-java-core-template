@@ -1,4 +1,4 @@
-package com.leon.rest_api;
+package com.leon.rest_api.config;
 
 import javax.sql.DataSource;
 

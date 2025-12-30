@@ -1,6 +1,6 @@
 //package com.leon.rest_api.service;
 //
-//import com.leon.rest_api.PrototypeService;
+//import com.leon.rest_api.config.PrototypeService;
 //import com.leon.rest_api.controller.PostService;
 //import com.leon.rest_api.dto.UserInfoInquiryDTOInput;
 //import org.slf4j.Logger;

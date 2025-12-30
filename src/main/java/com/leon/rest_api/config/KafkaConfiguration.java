@@ -1,4 +1,4 @@
-package com.leon.rest_api;
+package com.leon.rest_api.config;
 
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
