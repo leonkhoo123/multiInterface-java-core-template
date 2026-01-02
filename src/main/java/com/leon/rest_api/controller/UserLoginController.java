@@ -1,96 +1,77 @@
 package com.leon.rest_api.controller;
 
+import com.leon.rest_api.config.AppProperties;
+import com.leon.rest_api.config.JwtProperties;
 import com.leon.rest_api.dto.request.LoginRequest;
 import com.leon.rest_api.dto.response.CommonResponse;
 import com.leon.rest_api.dto.response.LoginResponse;
 import com.leon.rest_api.dto.response.LogoutResponse;
 import com.leon.rest_api.service.AuthService;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class UserLoginController implements UserLoginControllerInterface {
 
-    @Autowired
+    private static final Logger log = LoggerFactory.getLogger(UserLoginController.class);
+
     private final AuthService authService;
+    private final JwtProperties jwtProperties;
+    private final AppProperties appProperties;
 
-    @Value("${jwt.refresh-token.cookie-name:refresh_token}")
-    private String refreshTokenCookieName;
-
-    @Value("${jwt.refresh-token.max-age:604800}") // 7 days default
-    private int refreshTokenMaxAge;
-
-    @Value("${app.secure-cookie:true}")
-    private boolean secureCookie;
-
-    public UserLoginController(AuthService authService){
+    public UserLoginController(AuthService authService, JwtProperties jwtProperties, AppProperties appProperties){
         this.authService = authService;
-    };
+        this.jwtProperties = jwtProperties;
+        this.appProperties = appProperties;
+    }
 
     @Override
-    public ResponseEntity<CommonResponse<LoginResponse>> login(LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<CommonResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse loginResponse = authService.login(request);
 
-        // Set refresh token as HTTP-only cookie
-        Cookie refreshTokenCookie = createRefreshTokenCookie(loginResponse.getRefreshToken());
-        response.addCookie(refreshTokenCookie);
+        // Set refresh token as HTTP-only cookie using ResponseCookie builder
+        ResponseCookie refreshTokenCookie = buildRefreshTokenCookie(loginResponse.getRefreshToken(), jwtProperties.getRefreshToken().getMaxAge());
 
         // Remove refresh token from response body for security
         loginResponse.setRefreshToken(null);
 
-        return ResponseEntity.ok(CommonResponse.success("Login successful",loginResponse));
+        log.info("Login successful");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .body(CommonResponse.success("Login successful", loginResponse));
     }
 
     @Override
-    public ResponseEntity<CommonResponse<LogoutResponse>> logout(String authorization, HttpServletResponse response) {
-        String token = extractToken(authorization);
-        LogoutResponse logoutResponse = authService.logout(token);
+    public ResponseEntity<CommonResponse<LogoutResponse>> logout(String authorization) {
+        String accessToken = extractAccessToken(authorization);
+        LogoutResponse logoutResponse = authService.logout(accessToken);
 
         // Clear refresh token cookie
-        Cookie clearCookie = createClearedRefreshTokenCookie();
-        response.addCookie(clearCookie);
+        ResponseCookie refreshTokenCookie = buildRefreshTokenCookie("", 0);
 
-        return ResponseEntity.ok(CommonResponse.success("Logout successful",logoutResponse));
+        log.info("Logout successful");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .body(CommonResponse.success("Logout successful", logoutResponse));
     }
 
-    private Cookie createRefreshTokenCookie(String refreshToken) {
-        Cookie cookie = new Cookie(refreshTokenCookieName, refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(secureCookie); // true in production (HTTPS only)
-        cookie.setPath("/");
-        cookie.setMaxAge(refreshTokenMaxAge);
-        cookie.setAttribute("SameSite", "Strict");
-        return cookie;
-    }
-
-    private void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
-        ResponseCookie cookie = ResponseCookie.from(refreshTokenCookieName, refreshToken)
+    private ResponseCookie buildRefreshTokenCookie(String refreshToken, long maxAge) {
+        return ResponseCookie.from(jwtProperties.getRefreshToken().getCookieName(), refreshToken != null ? refreshToken : "")
                 .httpOnly(true)
-                .secure(secureCookie) // Must be true in prod for HTTPS
+                .secure(appProperties.isSecureCookie()) // Must be true in prod for HTTPS
                 .path("/")
-                .maxAge(refreshTokenMaxAge)
+                .maxAge(maxAge)
                 .sameSite("Strict") // Protects against CSRF
                 .build();
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
-    private Cookie createClearedRefreshTokenCookie() {
-        Cookie cookie = new Cookie(refreshTokenCookieName, null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(secureCookie);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        cookie.setAttribute("SameSite", "Strict");
-        return cookie;
-    }
-
-    private String extractToken(String authorization) {
+    private String extractAccessToken(String authorization) {
         if (authorization != null && authorization.startsWith("Bearer ")) {
             return authorization.substring(7);
         }

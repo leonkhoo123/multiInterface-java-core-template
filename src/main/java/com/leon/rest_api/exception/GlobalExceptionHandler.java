@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -35,6 +36,32 @@ public class GlobalExceptionHandler {
                 .body(CommonResponse.failure(
                         e.getMessage(),
                         ErrorCode.USER_NOT_FOUND.name()
+                ));
+    }
+
+    @ExceptionHandler(RefreshTokenException.class)
+    public ResponseEntity<CommonResponse<Void>> handleRefreshTokenException(
+            RefreshTokenException e,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(CommonResponse.failure(
+                        e.getMessage(),
+                        ErrorCode.REFRESH_TOKEN_ERROR.name()
+                ));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<CommonResponse<Void>> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException e,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(CommonResponse.failure(
+                        e.getMessage(),
+                        ErrorCode.INTERNAL_ERROR.name()
                 ));
     }
 

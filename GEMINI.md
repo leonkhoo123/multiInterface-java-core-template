@@ -8,7 +8,7 @@
 
 ### 1. Spring Java Approach
 - **Dependency Injection**: Prefer **constructor injection** over field injection (`@Autowired` on fields) to ensure immutability and easier testing.
-- **Annotations**: Correctly use Spring stereotypes (`@Service`, `@Repository`, `@RestController`, `@Component`).
+- **Annotations**: Correctly use Spring stereotypes (`@Service`, `@Repository`, `@RestController`, `@Component`)，do not use any lombok.
 - **Data Access**: Use Spring Data JPA/Repositories. Avoid raw JDBC unless necessary for performance.
 - **Security**: Integrate Spring Security for robust authentication and authorization.
 

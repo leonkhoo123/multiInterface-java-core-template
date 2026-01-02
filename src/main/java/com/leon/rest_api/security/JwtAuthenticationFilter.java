@@ -1,5 +1,6 @@
 package com.leon.rest_api.security;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,22 +35,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = getJwtFromRequest(request);
 
-            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-                // Check if token is blacklisted (Optional but recommended for production logout)
-                if (tokenProvider.isTokenBlacklisted(jwt)) {
-                    filterChain.doFilter(request, response);
-                    return;
+            if (StringUtils.hasText(jwt)) {
+                // Validate and get claims in one step to avoid double parsing
+                Claims claims = tokenProvider.validateAndGetClaims(jwt);
+                
+                if (claims != null) {
+                    // Check if token is blacklisted (Optional but recommended for production logout)
+                    if (tokenProvider.isTokenBlacklisted(jwt)) {
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+
+                    String username = claims.getSubject();
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
-
-                String username = tokenProvider.getUsernameFromToken(jwt);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception ex) {
             // We don't throw exceptions here to allow the filter chain to continue

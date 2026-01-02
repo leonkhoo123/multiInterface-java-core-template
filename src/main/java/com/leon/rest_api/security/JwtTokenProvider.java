@@ -1,12 +1,12 @@
 package com.leon.rest_api.security;
 
-import com.leon.rest_api.service.TokenBlacklistService;
+import com.leon.rest_api.config.JwtProperties;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -19,24 +19,19 @@ public class JwtTokenProvider {
     private static final Logger log = LoggerFactory.getLogger(JwtTokenProvider.class);
 
     private final SecretKey key;
-    private final long jwtExpirationMs;
-    private final TokenBlacklistService blacklistService; // Inject this
+    private final JwtProperties jwtProperties;
+    private final TokenBlacklistService blacklistService;
 
-    @Value("${jwt.refreshExpirationMs:604800000}") // Default 7 days
-    private static long refreshExpirationMs;
-
-    public JwtTokenProvider(
-            @Value("${jwt.secret}") String jwtSecret,
-            @Value("${jwt.expirationMs:900000}") long jwtExpirationMs, TokenBlacklistService blacklistService) {
-        this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-        this.jwtExpirationMs = jwtExpirationMs;
+    public JwtTokenProvider(JwtProperties jwtProperties, TokenBlacklistService blacklistService) {
+        this.jwtProperties = jwtProperties;
+        this.key = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8));
         this.blacklistService = blacklistService;
     }
 
     public String generateAccessToken(Authentication authentication) {
         String username = authentication.getName();
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
+        Date expiryDate = new Date(now.getTime() + jwtProperties.getAccessToken().getExpiration());
 
         // Note: signWith(key) automatically detects HS512 based on key length
         return Jwts.builder()
@@ -61,6 +56,19 @@ public class JwtTokenProvider {
         return false;
     }
 
+    public Claims validateAndGetClaims(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (JwtException | IllegalArgumentException e) {
+            log.error("JWT Validation failed: {}", e.getMessage());
+        }
+        return null;
+    }
+
     public String getUsernameFromToken(String token) {
         return Jwts.parser()
                 .verifyWith(key)
@@ -71,7 +79,7 @@ public class JwtTokenProvider {
     }
 
     public long getAccessTokenExpiration() {
-        return jwtExpirationMs;
+        return jwtProperties.getAccessToken().getExpiration();
     }
 
     public boolean isTokenBlacklisted(String token) {
@@ -100,7 +108,7 @@ public class JwtTokenProvider {
     public String generateRefreshToken(Authentication authentication) {
         String username = authentication.getName();
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + refreshExpirationMs);
+        Date expiryDate = new Date(now.getTime() + jwtProperties.getRefreshToken().getExpiration());
 
         return Jwts.builder()
                 .subject(username)
@@ -111,6 +119,6 @@ public class JwtTokenProvider {
     }
 
     public long getRefreshTokenExpiration() {
-        return refreshExpirationMs;
+        return jwtProperties.getRefreshToken().getExpiration();
     }
 }

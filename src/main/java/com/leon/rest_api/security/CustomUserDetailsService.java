@@ -1,4 +1,4 @@
-package com.leon.rest_api.service;
+package com.leon.rest_api.security;
 
 import com.leon.rest_api.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;

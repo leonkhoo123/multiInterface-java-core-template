@@ -1,15 +1,15 @@
 package com.leon.rest_api.controller;
 
+import com.leon.rest_api.config.AppProperties;
+import com.leon.rest_api.config.JwtProperties;
 import com.leon.rest_api.dto.response.CommonResponse;
 import com.leon.rest_api.dto.response.RefreshTokenResponse;
 import com.leon.rest_api.service.AuthService;
-import com.leon.rest_api.dto.TokenTuple; // You'll need this simple POJO
+import com.leon.rest_api.dto.TokenTuple;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -26,60 +26,54 @@ public class RefreshTokenController {
     private static final Logger log = LoggerFactory.getLogger(RefreshTokenController.class);
 
     private final AuthService authService;
+    private final JwtProperties jwtProperties;
+    private final AppProperties appProperties;
 
-    @Value("${jwt.refresh-token.cookie-name:refresh_token}")
-    private String refreshTokenCookieName;
-
-    @Value("${jwt.refresh-token.max-age:604800}")
-    private int refreshTokenMaxAge;
-
-    @Value("${app.secure-cookie:true}")
-    private boolean secureCookie;
-
-    public RefreshTokenController(AuthService authService) {
+    public RefreshTokenController(AuthService authService, JwtProperties jwtProperties, AppProperties appProperties) {
         this.authService = authService;
+        this.jwtProperties = jwtProperties;
+        this.appProperties = appProperties;
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<CommonResponse<RefreshTokenResponse>> refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response) {
+            HttpServletRequest request) {
 
-        String oldRefreshToken = extractRefreshTokenFromCookie(request);
+        String refreshToken = extractRefreshTokenFromCookie(request);
 
-        if (oldRefreshToken == null || oldRefreshToken.isEmpty()) {
+        if (refreshToken == null || refreshToken.isEmpty()) {
             log.warn("Refresh attempt without cookie");
             return ResponseEntity.badRequest().body(CommonResponse.failure("Refresh token missing", "MISSING_TOKEN"));
         }
 
         // 1. Rotate tokens via Service
-        TokenTuple tokens = authService.rotateRefreshToken(oldRefreshToken);
+        TokenTuple tokenTuple = authService.rotateRefreshToken(refreshToken);
 
         // 2. Set the NEW refresh token in the HTTP-Only cookie
-        ResponseCookie cookie = ResponseCookie.from(refreshTokenCookieName, tokens.getRefreshToken())
+        ResponseCookie refreshTokenCookie = ResponseCookie.from(jwtProperties.getRefreshToken().getCookieName(), tokenTuple.getRefreshToken())
                 .httpOnly(true)
-                .secure(secureCookie)
+                .secure(appProperties.isSecureCookie())
                 .path("/")
-                .maxAge(refreshTokenMaxAge)
+                .maxAge(jwtProperties.getRefreshToken().getMaxAge())
                 .sameSite("Strict")
                 .build();
 
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
         // 3. Return only the new Access Token in the body
-        RefreshTokenResponse refreshResponse = new RefreshTokenResponse(
-                tokens.getAccessToken(),
+        RefreshTokenResponse response = new RefreshTokenResponse(
+                tokenTuple.getAccessToken(),
                 "Bearer",
-                refreshTokenMaxAge // Or your access token duration
+                jwtProperties.getAccessToken().getExpiration() // Use access token expiration here
         );
 
-        return ResponseEntity.ok(CommonResponse.success("Token refreshed successfully", refreshResponse));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .body(CommonResponse.success("Token refreshed successfully", response));
     }
 
     private String extractRefreshTokenFromCookie(HttpServletRequest request) {
         if (request.getCookies() == null) return null;
         return Arrays.stream(request.getCookies())
-                .filter(cookie -> refreshTokenCookieName.equals(cookie.getName()))
+                .filter(cookie -> jwtProperties.getRefreshToken().getCookieName().equals(cookie.getName()))
                 .map(Cookie::getValue)
                 .findFirst()
                 .orElse(null);

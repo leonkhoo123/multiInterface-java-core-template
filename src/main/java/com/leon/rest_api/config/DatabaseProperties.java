@@ -11,7 +11,7 @@ public class DatabaseProperties {
     private String password;
     
 	public String getUrl() {
-		return "jdbc:mysql://"+url;
+		return "jdbc:mysql://"+url+"?useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true";
 	}
 	public void setUrl(String url) {
 		this.url = url;

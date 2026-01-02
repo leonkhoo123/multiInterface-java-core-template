@@ -13,7 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/v1/")
 @Tag(name = "Login Api", description = "User login management APIs")
 public interface UserLoginControllerInterface {
 
@@ -49,7 +49,7 @@ public interface UserLoginControllerInterface {
     })
     @PostMapping("/login")
     ResponseEntity<CommonResponse<LoginResponse>> login(
-            LoginRequest request, HttpServletResponse response
+            LoginRequest request
     );
 
     // -------------------- LOGOUT --------------------
@@ -77,6 +77,6 @@ public interface UserLoginControllerInterface {
     })
     @PostMapping("/logout")
     ResponseEntity<CommonResponse<LogoutResponse>> logout(
-            String authorization, HttpServletResponse response
+            String authorization
     );
 }
