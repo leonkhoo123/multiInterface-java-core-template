@@ -1,5 +1,7 @@
 package com.leon.rest_api.security;
 
+import com.leon.rest_api.config.AppProperties;
+import com.leon.rest_api.logger.HttpLoggingFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,11 +25,16 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
+    private final HttpLoggingFilter httpLoggingFilter;
+    private final AppProperties appProperties;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
-                          JwtAuthenticationEntryPoint unauthorizedHandler) {
+                          JwtAuthenticationEntryPoint unauthorizedHandler,
+                          HttpLoggingFilter httpLoggingFilter, AppProperties appProperties) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.unauthorizedHandler = unauthorizedHandler;
+        this.httpLoggingFilter = httpLoggingFilter;
+        this.appProperties = appProperties;
     }
 
     @Bean
@@ -51,6 +58,8 @@ public class SecurityConfig {
 
         // Add our custom JWT filter
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        // Add logging filter before JWT filter to capture requests even if JWT validation fails
+        http.addFilterBefore(httpLoggingFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }
@@ -61,7 +70,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // Use your actual frontend URL (e.g., https://myapp.com)
-        configuration.setAllowedOrigins(List.of("http://localhost:8080", "https://yourdomain.com"));
+        configuration.setAllowedOrigins(appProperties.getAllowedOrigins());
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         // CRITICAL: Must be true to allow cookies to be sent/received

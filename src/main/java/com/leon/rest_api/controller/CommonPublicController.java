@@ -6,6 +6,8 @@ import com.leon.rest_api.dto.response.CommonResponse;
 import com.leon.rest_api.service.UserInfoTest;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +17,8 @@ import java.math.BigDecimal;
 @RestController
 public class CommonPublicController implements CommonPublicControllerInterface {
 
-//	private static final Logger log = LoggerFactory.getLogger(CommonPublicController.class);
+	private static final Logger log = LoggerFactory.getLogger(CommonPublicController.class);
+
 	private final UserInfoTest userInfoTest;
 
     public CommonPublicController(UserInfoTest userInfoTest) {
@@ -23,6 +26,7 @@ public class CommonPublicController implements CommonPublicControllerInterface {
     }
 
 	public String testEndpoint() {
+		log.info("testing");
 		return "OK";
 	}
 

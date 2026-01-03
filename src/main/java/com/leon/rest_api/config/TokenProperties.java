@@ -7,22 +7,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "jwt")
-public class JwtProperties {
+@ConfigurationProperties(prefix = "token")
+public class TokenProperties {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtProperties.class);
+    private static final Logger logger = LoggerFactory.getLogger(TokenProperties.class);
 
-    private String secret = null;
     private AccessToken accessToken = new AccessToken();
     private RefreshToken refreshToken = new RefreshToken();
-
-    public String getSecret() {
-        return secret;
-    }
-
-    public void setSecret(String secret) {
-        this.secret = secret;
-    }
 
     public AccessToken getAccessToken() {
         return accessToken;
@@ -42,14 +33,25 @@ public class JwtProperties {
 
     @PostConstruct
     public void logConfig() {
-        if (secret == null || secret.isBlank() || secret.length() < 34) {
-            logger.error("JWT Secret is not correctly configured! Application cannot start. Please set the jwt.secret environment variable.");
+        if (accessToken.secret == null || accessToken.secret.isBlank() || accessToken.secret.length() < 34) {
+            logger.error("JWT Secret is not correctly configured! Application cannot start. Please set the token.accessToken.secret environment variable.");
             throw new IllegalStateException("JWT Secret is incorrect/missing from configuration.");
         }
 
-        String maskedSecret = (secret != null && secret.length() >= 34) ? secret.substring(0, 6) + "..." : "[HIDDEN]";
-        logger.info("JwtProperties loaded: secret={}, accessToken.expiration={}, refreshToken.expiration={}, refreshToken.cookieName={}, refreshToken.maxAge={}",
-                maskedSecret,
+        if (refreshToken.papper == null || refreshToken.papper.isBlank() || refreshToken.papper.length() < 34) {
+            logger.error("Access Token Secret is not correctly configured! Application cannot start. Please set the token.refreshToken.papper environment variable.");
+            throw new IllegalStateException("Refresh Token papper is incorrect/missing from configuration.");
+        }
+
+        String jwtmaskedSecret = (accessToken.secret != null && accessToken.secret.length() >= 34) ? accessToken.secret.substring(0, 6) + "..." : "[HIDDEN]";
+        String refreshPapperMaskedSecret = (refreshToken.papper != null && refreshToken.papper.length() >= 34) ? refreshToken.papper.substring(0, 6) + "..." : "[HIDDEN]";
+
+        logger.info("TokenProperties loaded: accessToken secret={}, accessToken.expiration={}",
+                jwtmaskedSecret,
+                accessToken.getExpiration());
+
+        logger.info("TokenProperties loaded: refreshToken secret={}, refreshToken.expiration={}, refreshToken.cookieName={}, refreshToken.maxAge={}",
+                refreshPapperMaskedSecret,
                 accessToken.getExpiration(),
                 refreshToken.getExpiration(),
                 refreshToken.getCookieName(),
@@ -57,6 +59,8 @@ public class JwtProperties {
     }
 
     public static class AccessToken {
+        private String secret = null;
+
         private long expiration;
 
         public long getExpiration() {
@@ -66,11 +70,20 @@ public class JwtProperties {
         public void setExpiration(long expiration) {
             this.expiration = expiration;
         }
+
+        public String getSecret() {
+            return secret;
+        }
+
+        public void setSecret(String secret) {
+            this.secret = secret;
+        }
     }
 
     public static class RefreshToken {
+        private String papper = null;
         private long expiration;
-        private String cookieName;
+        private String cookieName ;
         private int maxAge;
 
         public long getExpiration() {
@@ -95,6 +108,14 @@ public class JwtProperties {
 
         public void setMaxAge(int maxAge) {
             this.maxAge = maxAge;
+        }
+
+        public String getPapper() {
+            return papper;
+        }
+
+        public void setPapper(String papper) {
+            this.papper = papper;
         }
     }
 }

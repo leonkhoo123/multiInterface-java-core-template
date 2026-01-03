@@ -1,6 +1,7 @@
 package com.leon.rest_api.exception;
 
 import com.leon.rest_api.dto.response.CommonResponse;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -36,19 +37,6 @@ public class GlobalExceptionHandler {
                 .body(CommonResponse.failure(
                         e.getMessage(),
                         ErrorCode.USER_NOT_FOUND.name()
-                ));
-    }
-
-    @ExceptionHandler(RefreshTokenException.class)
-    public ResponseEntity<CommonResponse<Void>> handleRefreshTokenException(
-            RefreshTokenException e,
-            HttpServletRequest request
-    ) {
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body(CommonResponse.failure(
-                        e.getMessage(),
-                        ErrorCode.REFRESH_TOKEN_ERROR.name()
                 ));
     }
 
@@ -122,10 +110,35 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(CommonResponse.failure(
-                        "Authentication failed: " + e.getMessage(),
+                        "Unauthorized",
                         ErrorCode.UNAUTHORIZED.name()
                 ));
     }
+
+    @ExceptionHandler(RefreshTokenException.class)
+    public ResponseEntity<CommonResponse<Void>> handleRefreshTokenException(
+            RefreshTokenException e,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(CommonResponse.failure(
+                        e.getMessage(),
+                        ErrorCode.REFRESH_TOKEN_ERROR.name()
+                ));
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<CommonResponse<Void>> handleExpiredJwtException(
+            Exception e, HttpServletRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(CommonResponse.failure(
+                        "Barrier Token Expired",
+                        ErrorCode.UNAUTHORIZED.name()
+                ));
+    }
+
 
     // ---------------- Fallback ----------------
 

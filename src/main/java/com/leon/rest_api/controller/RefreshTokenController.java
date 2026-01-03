@@ -1,10 +1,11 @@
 package com.leon.rest_api.controller;
 
 import com.leon.rest_api.config.AppProperties;
-import com.leon.rest_api.config.JwtProperties;
+import com.leon.rest_api.config.TokenProperties;
 import com.leon.rest_api.dto.response.CommonResponse;
 import com.leon.rest_api.dto.response.RefreshTokenResponse;
-import com.leon.rest_api.service.AuthService;
+import com.leon.rest_api.security.RefreshTokenUtils;
+import com.leon.rest_api.service.RefreshTokenService;
 import com.leon.rest_api.dto.TokenTuple;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,26 +21,28 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Arrays;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/")
 public class RefreshTokenController {
 
     private static final Logger log = LoggerFactory.getLogger(RefreshTokenController.class);
 
-    private final AuthService authService;
-    private final JwtProperties jwtProperties;
+    private final RefreshTokenService refreshTokenService;
+    private final TokenProperties tokenProperties;
     private final AppProperties appProperties;
+    private final RefreshTokenUtils refreshTokenUtils;
 
-    public RefreshTokenController(AuthService authService, JwtProperties jwtProperties, AppProperties appProperties) {
-        this.authService = authService;
-        this.jwtProperties = jwtProperties;
+    public RefreshTokenController(RefreshTokenService refreshTokenService, TokenProperties tokenProperties, AppProperties appProperties, RefreshTokenUtils refreshTokenUtils) {
+        this.refreshTokenService = refreshTokenService;
+        this.tokenProperties = tokenProperties;
         this.appProperties = appProperties;
+        this.refreshTokenUtils = refreshTokenUtils;
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<CommonResponse<RefreshTokenResponse>> refreshToken(
             HttpServletRequest request) {
 
-        String refreshToken = extractRefreshTokenFromCookie(request);
+        String refreshToken = refreshTokenUtils.extractRefreshTokenFromCookie(request);
 
         if (refreshToken == null || refreshToken.isEmpty()) {
             log.warn("Refresh attempt without cookie");
@@ -47,14 +50,14 @@ public class RefreshTokenController {
         }
 
         // 1. Rotate tokens via Service
-        TokenTuple tokenTuple = authService.rotateRefreshToken(refreshToken);
+        TokenTuple tokenTuple = refreshTokenService.rotateRefreshToken(refreshToken);
 
         // 2. Set the NEW refresh token in the HTTP-Only cookie
-        ResponseCookie refreshTokenCookie = ResponseCookie.from(jwtProperties.getRefreshToken().getCookieName(), tokenTuple.getRefreshToken())
+        ResponseCookie refreshTokenCookie = ResponseCookie.from(tokenProperties.getRefreshToken().getCookieName(), tokenTuple.getRefreshToken())
                 .httpOnly(true)
                 .secure(appProperties.isSecureCookie())
                 .path("/")
-                .maxAge(jwtProperties.getRefreshToken().getMaxAge())
+                .maxAge(tokenProperties.getRefreshToken().getMaxAge())
                 .sameSite("Strict")
                 .build();
 
@@ -62,7 +65,7 @@ public class RefreshTokenController {
         RefreshTokenResponse response = new RefreshTokenResponse(
                 tokenTuple.getAccessToken(),
                 "Bearer",
-                jwtProperties.getAccessToken().getExpiration() // Use access token expiration here
+                tokenProperties.getAccessToken().getExpiration() // Use access token expiration here
         );
 
         return ResponseEntity.ok()
@@ -70,12 +73,5 @@ public class RefreshTokenController {
                 .body(CommonResponse.success("Token refreshed successfully", response));
     }
 
-    private String extractRefreshTokenFromCookie(HttpServletRequest request) {
-        if (request.getCookies() == null) return null;
-        return Arrays.stream(request.getCookies())
-                .filter(cookie -> jwtProperties.getRefreshToken().getCookieName().equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
-    }
+
 }

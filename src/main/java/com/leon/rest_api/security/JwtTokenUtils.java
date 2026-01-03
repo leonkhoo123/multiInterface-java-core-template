@@ -1,37 +1,41 @@
 package com.leon.rest_api.security;
 
-import com.leon.rest_api.config.JwtProperties;
+import com.leon.rest_api.config.TokenProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
-public class JwtTokenProvider {
-    private static final Logger log = LoggerFactory.getLogger(JwtTokenProvider.class);
+public class JwtTokenUtils {
+    private static final Logger log = LoggerFactory.getLogger(JwtTokenUtils.class);
+    private static final String REQUEST_ID_KEY = "requestId";
 
     private final SecretKey key;
-    private final JwtProperties jwtProperties;
+    private final TokenProperties tokenProperties;
     private final TokenBlacklistService blacklistService;
 
-    public JwtTokenProvider(JwtProperties jwtProperties, TokenBlacklistService blacklistService) {
-        this.jwtProperties = jwtProperties;
-        this.key = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8));
+    public JwtTokenUtils(TokenProperties tokenProperties, TokenBlacklistService blacklistService) {
+        this.tokenProperties = tokenProperties;
+        this.key = Keys.hmacShaKeyFor(tokenProperties.getAccessToken().getSecret().getBytes(StandardCharsets.UTF_8));
         this.blacklistService = blacklistService;
     }
 
     public String generateAccessToken(Authentication authentication) {
         String username = authentication.getName();
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtProperties.getAccessToken().getExpiration());
+        Date expiryDate = new Date(now.getTime() + tokenProperties.getAccessToken().getExpiration());
 
         // Note: signWith(key) automatically detects HS512 based on key length
         return Jwts.builder()
@@ -42,20 +46,6 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public boolean validateToken(String token) {
-        try {
-            // New 0.12.x syntax: Jwts.parser().verifyWith(key).build().parseSignedClaims(token)
-            Jwts.parser()
-                    .verifyWith(key)
-                    .build()
-                    .parseSignedClaims(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            log.error("JWT Validation failed: {}", e.getMessage());
-        }
-        return false;
-    }
-
     public Claims validateAndGetClaims(String token) {
         try {
             return Jwts.parser()
@@ -64,9 +54,17 @@ public class JwtTokenProvider {
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (JwtException | IllegalArgumentException e) {
-            log.error("JWT Validation failed: {}", e.getMessage());
+            logErrorWithRequestId(e);
         }
         return null;
+    }
+
+    private void logErrorWithRequestId(Exception e) {
+        String requestId = MDC.get(REQUEST_ID_KEY);
+        if (requestId == null) {
+            requestId = "unknown";
+        }
+        log.error("[{}] JWT Validation failed: {}", requestId, e.getMessage());
     }
 
     public String getUsernameFromToken(String token) {
@@ -79,7 +77,7 @@ public class JwtTokenProvider {
     }
 
     public long getAccessTokenExpiration() {
-        return jwtProperties.getAccessToken().getExpiration();
+        return tokenProperties.getAccessToken().getExpiration();
     }
 
     public boolean isTokenBlacklisted(String token) {
@@ -108,7 +106,7 @@ public class JwtTokenProvider {
     public String generateRefreshToken(Authentication authentication) {
         String username = authentication.getName();
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtProperties.getRefreshToken().getExpiration());
+        Date expiryDate = new Date(now.getTime() + tokenProperties.getRefreshToken().getExpiration());
 
         return Jwts.builder()
                 .subject(username)
@@ -118,7 +116,11 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public long getRefreshTokenExpiration() {
-        return jwtProperties.getRefreshToken().getExpiration();
+    public String getJwtFromRequest(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
 }

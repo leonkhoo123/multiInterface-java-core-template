@@ -12,6 +12,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Used during Login and JWT Filter
     Optional<User> findByUsername(String username);
 
+    // Used during Login and JWT Filter
+    Optional<User> findById(long id);
+
     // Good for registration checks
     Boolean existsByUsername(String username);
 

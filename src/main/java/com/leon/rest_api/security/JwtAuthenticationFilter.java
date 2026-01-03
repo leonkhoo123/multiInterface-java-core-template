@@ -20,11 +20,11 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenProvider tokenProvider;
+    private final JwtTokenUtils jwtTokenUtils;
     private final UserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, UserDetailsService userDetailsService) {
-        this.tokenProvider = tokenProvider;
+    public JwtAuthenticationFilter(JwtTokenUtils jwtTokenUtils, UserDetailsService userDetailsService) {
+        this.jwtTokenUtils = jwtTokenUtils;
         this.userDetailsService = userDetailsService;
     }
 
@@ -33,15 +33,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         try {
-            String jwt = getJwtFromRequest(request);
+            String jwt = jwtTokenUtils.getJwtFromRequest(request);
 
             if (StringUtils.hasText(jwt)) {
                 // Validate and get claims in one step to avoid double parsing
-                Claims claims = tokenProvider.validateAndGetClaims(jwt);
+                Claims claims = jwtTokenUtils.validateAndGetClaims(jwt);
                 
                 if (claims != null) {
                     // Check if token is blacklisted (Optional but recommended for production logout)
-                    if (tokenProvider.isTokenBlacklisted(jwt)) {
+                    if (jwtTokenUtils.isTokenBlacklisted(jwt)) {
                         filterChain.doFilter(request, response);
                         return;
                     }
@@ -64,13 +64,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    private String getJwtFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-        return null;
     }
 }

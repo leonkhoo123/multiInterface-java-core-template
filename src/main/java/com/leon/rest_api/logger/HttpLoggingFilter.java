@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.slf4j.MDC;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
@@ -19,12 +19,12 @@ import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 
-@Component
 public class HttpLoggingFilter implements Filter {
 
     private static final Logger log = LoggerFactory.getLogger(HttpLoggingFilter.class);
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private static final Set<String> SENSITIVE_ENDPOINTS = Set.of("/api/v1/login");
+    private static final String REQUEST_ID_KEY = "requestId";
 
     @Override
     public void doFilter(jakarta.servlet.ServletRequest request, jakarta.servlet.ServletResponse response,
@@ -39,6 +39,9 @@ public class HttpLoggingFilter implements Filter {
             requestId = UUID.randomUUID().toString();
         }
         cachedResponse.setHeader("X-Request-ID", requestId);
+        
+        // Put requestId in MDC so it can be accessed by other components (like JwtTokenProvider)
+        MDC.put(REQUEST_ID_KEY, requestId);
 
         // Log request BEFORE processing
         long startTime = logRequest(requestId, cachedRequest);
@@ -51,6 +54,7 @@ public class HttpLoggingFilter implements Filter {
         } finally {
             logResponse(requestId,cachedRequest, cachedResponse, startTime);
             cachedResponse.copyBodyToResponse(); // important: copy response back
+            MDC.remove(REQUEST_ID_KEY);
         }
     }
 
@@ -68,10 +72,10 @@ public class HttpLoggingFilter implements Filter {
         }
 
         long startTime = System.currentTimeMillis();
-        log.debug("\n[{}] REQUEST: {} [{}] \nX-Request-ID: {} \nHeaders:\n{} \nBody: {}",
-                sdf.format(new Date(startTime)),
+        log.debug("REQUEST: {} [{}][{}] \nX-Request-ID: {} \nHeaders:\n{} \nBody: {}",
                 request.getMethod(),
                 request.getRequestURL(),
+                sdf.format(new Date(startTime)),
                 requestId,
                 getHeaders(request),
                 body.isEmpty() ? "{}" : body);
@@ -88,12 +92,12 @@ public class HttpLoggingFilter implements Filter {
 
         long endTime = System.currentTimeMillis();
         long elapsed = endTime - startTime;
-        log.debug("\n[{}] RESPONSE: {} [{}][status={}][{}ms] \nHeaders:\n{} \nBody: {}",
-                sdf.format(new Date(endTime)),
+        log.debug("RESPONSE: {} [{}][status={}][{}][{}ms] \nHeaders:\n{} \nBody: {}",
                 request.getMethod(),
                 request.getRequestURL(),
                 response.getStatus(),
                 elapsed,
+                sdf.format(new Date(endTime)),
                 getHeaders(response),
                 body.isEmpty() ? "{}" : body);
         log.info("[{}] {} {} completed, status={} [{}ms]", requestId ,request.getMethod(), request.getRequestURI(), response.getStatus(),elapsed);
