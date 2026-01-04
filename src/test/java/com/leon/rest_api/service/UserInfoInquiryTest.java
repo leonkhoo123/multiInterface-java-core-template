@@ -3,7 +3,7 @@
 //import com.leon.rest_api.dto.UserInfoInquiryDTOInput;
 //import com.leon.rest_api.entities.UserInfo;
 //import com.leon.rest_api.repository.UserInfoRepository;
-//import com.leon.rest_api.utils.CommonHashMap;
+//import com.leon.common.utils.CommonHashMap;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;
 //import org.mockito.InjectMocks;

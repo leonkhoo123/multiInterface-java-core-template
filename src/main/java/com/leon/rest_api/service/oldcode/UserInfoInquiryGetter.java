@@ -5,7 +5,7 @@
 //import com.leon.rest_api.dto.UserInfoInquiryDTOOutput;
 //import com.leon.rest_api.entities.UserInfo;
 //import com.leon.rest_api.repository.UserInfoRepository;
-//import com.leon.rest_api.utils.CommonHashMap;
+//import com.leon.common.utils.CommonHashMap;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 //import org.springframework.stereotype.Service;

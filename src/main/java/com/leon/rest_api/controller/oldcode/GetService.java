@@ -1,6 +1,6 @@
 //package com.leon.rest_api.controller;
 //
-//import com.leon.rest_api.utils.CommonHashMap;
+//import com.leon.common.utils.CommonHashMap;
 //import org.springframework.transaction.annotation.Transactional;
 //
 //public abstract class GetService<I> {

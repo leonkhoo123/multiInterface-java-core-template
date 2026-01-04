@@ -2,7 +2,7 @@ package com.leon.rest_api.controller;
 
 import com.leon.rest_api.dto.request.UserInfoInquiryRequest;
 import com.leon.rest_api.dto.response.UserInfoInquiryResponse;
-import com.leon.rest_api.dto.response.CommonResponse;
+import com.leon.common.dto.response.CommonResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

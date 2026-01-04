@@ -1,6 +1,6 @@
 package com.leon.rest_api.service;
 
-import com.leon.rest_api.exception.UserNotFoundException;
+import com.leon.common.exception.UserNotFoundException;
 import com.leon.rest_api.dto.request.UserInfoInquiryRequest;
 import com.leon.rest_api.dto.response.UserInfoInquiryResponse;
 import com.leon.rest_api.entities.UserInfo;

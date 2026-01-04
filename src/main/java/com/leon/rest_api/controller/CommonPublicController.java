@@ -2,9 +2,8 @@ package com.leon.rest_api.controller;
 
 import com.leon.rest_api.dto.request.UserInfoInquiryRequest;
 import com.leon.rest_api.dto.response.UserInfoInquiryResponse;
-import com.leon.rest_api.dto.response.CommonResponse;
+import com.leon.common.dto.response.CommonResponse;
 import com.leon.rest_api.service.UserInfoTest;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

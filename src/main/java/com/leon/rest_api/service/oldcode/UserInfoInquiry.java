@@ -1,6 +1,6 @@
 //package com.leon.rest_api.service;
 //
-//import com.leon.rest_api.config.PrototypeService;
+//import com.leon.common.config.PrototypeService;
 //import com.leon.rest_api.dto.UserInfoInquiryDTOInput;
 //import com.leon.rest_api.dto.UserInfoInquiryDTOOutput;
 //import com.leon.rest_api.service.ob.UserInfoInquiryOB;

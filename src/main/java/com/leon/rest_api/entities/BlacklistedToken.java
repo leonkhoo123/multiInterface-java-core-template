@@ -1,11 +1,12 @@
 package com.leon.rest_api.entities;
 
+import com.leon.common.entities.BlacklistedTokenInterface;
 import jakarta.persistence.*;
 import java.time.Instant;
 
 @Entity
 @Table(name = "blacklisted_tokens")
-public class BlacklistedToken {
+public class BlacklistedToken implements BlacklistedTokenInterface {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
