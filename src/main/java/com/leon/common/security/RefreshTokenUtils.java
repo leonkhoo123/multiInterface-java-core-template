@@ -60,13 +60,9 @@ public class RefreshTokenUtils {
         try{
             SecureRandom.getInstanceStrong().nextBytes(randomBytes);
         }catch (Exception e){
-            throw new RuntimeException("generateRandomRefreshToken broken");
+            throw new RuntimeException("GenerateRandomRefreshToken failed!");
         }
         return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
-    }
-
-    public long getRefreshTokenExpiration() {
-        return tokenProperties.getRefreshToken().getExpiration();
     }
 
     public String extractRefreshTokenFromCookie(HttpServletRequest request) {

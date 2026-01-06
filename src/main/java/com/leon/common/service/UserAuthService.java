@@ -38,17 +38,15 @@ public class UserAuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtils jwtTokenUtils;
     private final PasswordEncoder passwordEncoder;
-    private final RefreshTokenUtils refreshTokenUtils;
     private final UserStore userStore;
     private final RefreshTokenStore refreshTokenStore;
 
     public UserAuthService(AuthenticationManager authenticationManager,
                            JwtTokenUtils jwtTokenUtils,
-                           PasswordEncoder passwordEncoder, RefreshTokenUtils refreshTokenUtils, UserStore userStore, RefreshTokenStore refreshTokenStore) {
+                           PasswordEncoder passwordEncoder, UserStore userStore, RefreshTokenStore refreshTokenStore) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenUtils = jwtTokenUtils;
         this.passwordEncoder = passwordEncoder;
-        this.refreshTokenUtils = refreshTokenUtils;
         this.userStore = userStore;
         this.refreshTokenStore = refreshTokenStore;
     }
@@ -108,7 +106,6 @@ public class UserAuthService {
         // logout from everywhere first
         // TODO : add multi device support and only logout from one device
         refreshTokenStore.revokeAllRefreshToken("logout", user.getId());
-        // refreshTokenUtils.logoutUser(user);
         SecurityContextHolder.clearContext();
         return new LogoutResponse(username, LocalDateTime.now());
     }
