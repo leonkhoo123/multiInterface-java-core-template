@@ -18,7 +18,7 @@ import java.util.List;
 
 @RequestMapping("/api/v1/auth/novel")
 @Tag(name = "Novel Endpoint", description = "Novel App related endpoint")
-public interface NovelControllerInterface {
+public interface NovelAuthControllerInterface {
 
     // ------------------- GET NOVEL LIST -------------------
      @GetMapping("/novelList")

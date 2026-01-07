@@ -12,7 +12,7 @@ public class AiProperties {
 
     private static final Logger logger = LoggerFactory.getLogger(AiProperties.class);
 
-    private String apiUrl = "http://localhost:3000/v1/chat/completions";
+    private String apiUrl = "http://192.168.1.10:1234/v1/chat/completions";
     private int maxToken = 20000;
     private double temp = 0.7;
     private String modelName = "qwen/qwen3-4b-2507";
@@ -21,6 +21,7 @@ public class AiProperties {
     @PostConstruct
     public void logConfiguration() {
         logger.info("""
+            
             === 🧠 LLM Configuration Initialized ===
             📡 API URL     : {}
             💬 Model Name  : {}
