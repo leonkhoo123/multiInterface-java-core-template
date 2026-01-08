@@ -35,7 +35,7 @@ public class AiService {
      */
     public String inquiryLocalLlm(String prompt) {
         logger.info("Sending prompt to LLM: {}", aiProperties.getApiUrl());
-
+        String reply = "";
         Map<String, Object> payload = new HashMap<>();
         payload.put("model", aiProperties.getModelName());
         payload.put("messages", List.of(
@@ -57,7 +57,7 @@ public class AiService {
                 List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
                 if (!choices.isEmpty()) {
                     Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
-                    String reply = (String) message.get("content");
+                    reply = (String) message.get("content");
 
                     // 🧠 Remove <think> blocks if THINKING is True (Note: Python code said "if THINKING", but logic implies removing it if we don't want it. 
                     // However, the python comment says "If THINKING is False, removes...". But the code says "if THINKING: reply = re.sub...".
@@ -88,6 +88,8 @@ public class AiService {
         } catch (Exception e) {
             logger.error("Local LLM error", e);
             return "(Local LLM error: " + e.getMessage() + ")";
+        }finally {
+            logger.info("Ai responded: [{}]",reply);
         }
     }
 }

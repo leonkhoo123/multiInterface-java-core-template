@@ -1,6 +1,9 @@
-package com.leon.common.exception;
+package com.leon.rest_api.exception;
 
 import com.leon.common.dto.response.CommonResponse;
+import com.leon.common.exception.GlobalExceptionHandlerInterface;
+import com.leon.common.exception.RefreshTokenException;
+import com.leon.common.exception.UserNotFoundException;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -16,14 +19,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler implements  GlobalExceptionHandlerInterface {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     private static final String TRACE_HEADER = "X-Request-ID";
 
-    private String traceId(HttpServletRequest request) {
-        return request.getHeader(TRACE_HEADER);
-    }
+//    private String traceId(HttpServletRequest request) {
+//        return request.getHeader(TRACE_HEADER);
+//    }
 
     // ---------------- Business ----------------
 
@@ -50,6 +53,19 @@ public class GlobalExceptionHandler {
                 .body(CommonResponse.failure(
                         e.getMessage(),
                         ErrorCode.INTERNAL_ERROR.name()
+                ));
+    }
+
+    @ExceptionHandler(NovelSequencenotFoundException.class)
+    public ResponseEntity<CommonResponse<Void>> handleNovelSequencenotFoundException(
+            NovelSequencenotFoundException e,
+            HttpServletRequest request
+    ){
+        return ResponseEntity
+                .status(HttpStatus.GONE)
+                .body(CommonResponse.failure(
+                        e.getMessage(),
+                        ErrorCode.NOVEL_CONTENT_NOT_FOUND.name()
                 ));
     }
 

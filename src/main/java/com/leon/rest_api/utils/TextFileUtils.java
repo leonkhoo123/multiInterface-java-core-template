@@ -1,7 +1,6 @@
 package com.leon.rest_api.utils;
 
 import com.leon.rest_api.dto.DecodingResult;
-import com.leon.rest_api.service.EncodingCandidate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -34,18 +33,14 @@ public class TextFileUtils {
      * Returns: DecodingResult(encoding, language, total_lines)
      * Throws IllegalArgumentException if no encoding succeeds.
      */
-    public static DecodingResult decodingVerification(String filePath, List<EncodingCandidate> encodingList) {
+    public static DecodingResult decodingVerification(String filePath) {
         logger.info("Start decoding verification");
         String bestEncoding = null;
-        String bestLang = null;
         int bestTotalLines = 0;
         Long leastReplaceCount = null;
 
-        for (EncodingCandidate encInfo : encodingList) {
-            String enc = encInfo.encoding();
-            String lang = encInfo.lang();
-
-            if (enc == null || lang == null) {
+        for (String enc : ENCODINGS_TO_TRY) {
+            if (enc == null) {
                 continue;
             }
 
@@ -75,12 +70,11 @@ public class TextFileUtils {
                     }
                 }
 
-                logger.info("Encoding [{}] Language: {} → replace_count: {}", enc, lang, replaceCount);
+                logger.info("Encoding [{}] → replace_count: {}", enc, replaceCount);
 
                 if (leastReplaceCount == null || replaceCount < leastReplaceCount) {
                     leastReplaceCount = replaceCount;
                     bestEncoding = enc;
-                    bestLang = lang;
                     bestTotalLines = lines;
                 }
 
@@ -97,8 +91,8 @@ public class TextFileUtils {
         }
 
         if (bestEncoding != null) {
-            logger.info("Best encoding: [{}], Language: [{}], Replacements: {}", bestEncoding, bestLang, leastReplaceCount);
-            return new DecodingResult(bestEncoding, bestLang, bestTotalLines);
+            logger.info("Best encoding: [{}], Replacements: {}, TotalLines: {}", bestEncoding, leastReplaceCount, bestTotalLines);
+            return new DecodingResult(bestEncoding, bestTotalLines);
         }
 
         throw new IllegalArgumentException("No valid encoding found for file: " + filePath);

@@ -1,27 +1,29 @@
 package com.leon.rest_api.controller;
 
 import com.leon.common.dto.response.CommonResponse;
-import com.leon.rest_api.processor.NovelProcessor;
+import com.leon.rest_api.dto.request.NovelContentRequest;
+import com.leon.rest_api.dto.response.GetNovelListResponse;
+import com.leon.rest_api.dto.response.NovelContentResponse;
+import com.leon.rest_api.service.NovelProcessorService;
 import com.leon.rest_api.service.AiService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import com.leon.rest_api.service.NovelService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/novel")
 @Tag(name = "Novel Public Endpoint", description = "Novel App related public endpoint")
 public class NovelController {
     private final AiService aiService;
-    private final NovelProcessor novelProcessor;
+    private final NovelProcessorService novelProcessorService;
+    private final NovelService novelService;
 
-    public NovelController(AiService aiService, NovelProcessor novelProcessor) {
+    public NovelController(AiService aiService, NovelProcessorService novelProcessorService, NovelService novelService) {
         this.aiService = aiService;
-        this.novelProcessor = novelProcessor;
+        this.novelProcessorService = novelProcessorService;
+        this.novelService = novelService;
     }
 
     @GetMapping("/testAi")
@@ -32,8 +34,21 @@ public class NovelController {
 
     @GetMapping("/startNovelProcessor")
     public ResponseEntity<CommonResponse<String>> startNovelProcessor() {
-        novelProcessor.consumeNovel();
+        novelProcessorService.consumeNovel();
         return ResponseEntity.ok(CommonResponse.success("Inquiry Response", "oh yeah"));
+    }
+
+    //temp test all my api here, dont wan handle auth first
+    @PostMapping("/novelContent")
+    public ResponseEntity<CommonResponse<NovelContentResponse>> novelContent(@Valid @RequestBody NovelContentRequest request) {
+        NovelContentResponse response = novelService.getNovelContent(request);
+        return ResponseEntity.ok(CommonResponse.success("", response));
+    }
+
+    @GetMapping("/getNovelList")
+    public ResponseEntity<CommonResponse<GetNovelListResponse>> getNovelList() {
+        GetNovelListResponse response = novelService.getNovelList();
+        return ResponseEntity.ok(CommonResponse.success("", response));
     }
 
 }

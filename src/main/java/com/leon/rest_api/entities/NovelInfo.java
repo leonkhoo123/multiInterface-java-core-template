@@ -4,9 +4,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import org.apache.kafka.common.protocol.types.Field;
 
-import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
@@ -14,26 +13,32 @@ import java.util.Objects;
 public class NovelInfo {
 
     @Id
-    @Column(nullable = false)
-    private Integer novelId;
+    @Column(nullable = false,unique = true)
+    private Long novelId;
 
-    @Column(nullable = false)
+    @Column(nullable = false,unique = true)
     private String novelName;
 
     @Column(nullable = false)
-    private Integer progressSeqNo;
+    private Long seqCount;
 
     @Column(nullable = false)
-    private Boolean lastRead;
+    private Long characterCount;
+
+    @Column(nullable = false)
+    private Timestamp addedTime;
+
+    @Column(nullable = false)
+    private boolean uploadCompleted;
 
     public NovelInfo() {
     }
 
-    public Integer getNovelId() {
+    public Long getNovelId() {
         return novelId;
     }
 
-    public void setNovelId(Integer novelId) {
+    public void setNovelId(Long novelId) {
         this.novelId = novelId;
     }
 
@@ -45,31 +50,47 @@ public class NovelInfo {
         this.novelName = novelName;
     }
 
-    public Integer getProgressSeqId() {
-        return progressSeqNo;
+    public Long getSeqCount() {
+        return seqCount;
     }
 
-    public void setProgressSeqId(Integer progressSeqNo) {
-        this.progressSeqNo = progressSeqNo;
+    public void setSeqCount(Long seqCount) {
+        this.seqCount = seqCount;
     }
 
-    public Boolean getLastRead() {
-        return lastRead;
+    public Long getCharacterCount() {
+        return characterCount;
     }
 
-    public void setLastRead(Boolean lastRead) {
-        this.lastRead = lastRead;
+    public void setCharacterCount(Long characterCount) {
+        this.characterCount = characterCount;
+    }
+
+    public Timestamp getAddedTime() {
+        return addedTime;
+    }
+
+    public void setAddedTime(Timestamp addedTime) {
+        this.addedTime = addedTime;
+    }
+
+    public boolean isUploadCompleted() {
+        return uploadCompleted;
+    }
+
+    public void setUploadCompleted(boolean uploadCompleted) {
+        this.uploadCompleted = uploadCompleted;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         NovelInfo novelInfo = (NovelInfo) o;
-        return Objects.equals(novelId, novelInfo.novelId) && Objects.equals(novelName, novelInfo.novelName);
+        return Objects.equals(novelId, novelInfo.novelId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(novelId, novelName);
+        return Objects.hashCode(novelId);
     }
 }

@@ -1,4 +1,4 @@
-package com.leon.common.exception;
+package com.leon.rest_api.exception;
 
 public enum ErrorCode {
 
@@ -7,5 +7,6 @@ public enum ErrorCode {
     VALIDATION_ERROR,
     UNAUTHORIZED,
     INTERNAL_ERROR,
-    REFRESH_TOKEN_ERROR
+    REFRESH_TOKEN_ERROR,
+    NOVEL_CONTENT_NOT_FOUND
 }
