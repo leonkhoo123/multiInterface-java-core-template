@@ -38,17 +38,4 @@ public class NovelController {
         return ResponseEntity.ok(CommonResponse.success("Inquiry Response", "oh yeah"));
     }
 
-    //temp test all my api here, dont wan handle auth first
-    @PostMapping("/novelContent")
-    public ResponseEntity<CommonResponse<NovelContentResponse>> novelContent(@Valid @RequestBody NovelContentRequest request) {
-        NovelContentResponse response = novelService.getNovelContent(request);
-        return ResponseEntity.ok(CommonResponse.success("", response));
-    }
-
-    @GetMapping("/getNovelList")
-    public ResponseEntity<CommonResponse<GetNovelListResponse>> getNovelList() {
-        GetNovelListResponse response = novelService.getNovelList();
-        return ResponseEntity.ok(CommonResponse.success("", response));
-    }
-
 }

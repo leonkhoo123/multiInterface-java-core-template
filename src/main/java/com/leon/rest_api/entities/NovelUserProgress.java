@@ -1,15 +1,14 @@
 package com.leon.rest_api.entities;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
+import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
 @Table(name = "novel_user_progress")
+@IdClass(NovelUserProgress_pk.class)
 public class NovelUserProgress {
 
     @Id
@@ -23,8 +22,8 @@ public class NovelUserProgress {
     @Column(nullable = false)
     private Long readUntil;
 
-    @Column(nullable = false)
-    private boolean lastRead;
+    @Column(nullable = true)
+    private Timestamp lastRead;
 
     public NovelUserProgress() {
     }
@@ -53,11 +52,11 @@ public class NovelUserProgress {
         this.readUntil = readUntil;
     }
 
-    public boolean isLastRead() {
+    public Timestamp getLastRead() {
         return lastRead;
     }
 
-    public void setLastRead(boolean lastRead) {
+    public void setLastRead(Timestamp lastRead) {
         this.lastRead = lastRead;
     }
 

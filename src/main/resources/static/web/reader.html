@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Novel Reader — Smooth Bidirectional</title>
+<style>
+  body {
+    margin: 0;
+    background: #ddd8d2;
+    color: #eee;
+    font-family: system-ui, sans-serif;
+    line-height: 1.8;
+  }
+  #reader {
+    height: 100vh;
+    overflow-y: auto;
+    padding: 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    scrollbar-width: none;        /* Firefox */
+    -ms-overflow-style: none;     /* IE / old Edge */
+    color: #0a0a0a;
+  }
+  #reader::-webkit-scrollbar {
+  display: none;                /* Chrome / Safari / Edge */
+  }
+  section {
+    padding: 0px;
+    margin: 0px;
+  }
+  .topbar {
+    width: 100%;
+    height: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+    box-sizing: border-box;
+    background: #222;
+  }
+  .font-controls button {
+    cursor: pointer;
+    margin-left: 5px;
+  }
+</style>
+</head>
+<body>
+<div id="topbar" class="topbar">
+  <div id="novel-name" >Novel Name</div>
+  <div class="font-controls">
+    <button id="font-plus" style="width:3rem">A+</button>
+    <button id="font-minus" style="width:3rem">A-</button>
+  </div>
+</div>
+<div id="reader"><div id="sections"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="/js/axios-config.js"></script>
+<script src="/js/reader.js"></script>
+</body>
+</html>

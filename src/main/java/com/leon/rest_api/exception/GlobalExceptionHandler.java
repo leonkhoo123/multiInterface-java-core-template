@@ -69,6 +69,19 @@ public class GlobalExceptionHandler implements  GlobalExceptionHandlerInterface 
                 ));
     }
 
+    @ExceptionHandler(NovelNotFoundException.class)
+    public ResponseEntity<CommonResponse<Void>> handleNovelNotFoundException(
+            NovelNotFoundException e,
+            HttpServletRequest request
+    ){
+        return ResponseEntity
+                .status(HttpStatus.GONE)
+                .body(CommonResponse.failure(
+                        e.getMessage(),
+                        ErrorCode.NOVEL_NOT_FOUND.name()
+                ));
+    }
+
     // ---------------- Validation ----------------
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

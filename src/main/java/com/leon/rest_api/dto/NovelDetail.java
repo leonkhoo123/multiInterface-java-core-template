@@ -1,41 +1,27 @@
-package com.leon.rest_api.entities;
+package com.leon.rest_api.dto;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 
 import java.sql.Timestamp;
-import java.util.Objects;
 
-@Entity
-@Table(name = "novel_info")
-public class NovelInfo {
+public class NovelDetail {
 
-    @Id
-    @Column(nullable = false,unique = true)
     private Long novelId;
 
-    @Column(nullable = false,unique = true)
     private String novelName;
 
-    @Column(nullable = false)
     private Long seqCount;
 
-    @Column(nullable = false)
     private Long characterCount;
 
-    @Column(nullable = false)
     private Timestamp addedTime;
 
-    @Column(nullable = false)
-    private boolean uploadCompleted;
-
-    @Column(nullable = false, length = 50)
     private String ownerUsername;
 
-    public NovelInfo() {
-    }
+    private Long readUntil;
+
+    private Timestamp lastRead;
 
     public Long getNovelId() {
         return novelId;
@@ -77,14 +63,6 @@ public class NovelInfo {
         this.addedTime = addedTime;
     }
 
-    public boolean isUploadCompleted() {
-        return uploadCompleted;
-    }
-
-    public void setUploadCompleted(boolean uploadCompleted) {
-        this.uploadCompleted = uploadCompleted;
-    }
-
     public String getOwnerUsername() {
         return ownerUsername;
     }
@@ -93,15 +71,19 @@ public class NovelInfo {
         this.ownerUsername = ownerUsername;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        NovelInfo novelInfo = (NovelInfo) o;
-        return Objects.equals(novelId, novelInfo.novelId);
+    public Long getReadUntil() {
+        return readUntil;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(novelId);
+    public void setReadUntil(Long readUntil) {
+        this.readUntil = readUntil;
+    }
+
+    public Timestamp getLastRead() {
+        return lastRead;
+    }
+
+    public void setLastRead(Timestamp lastRead) {
+        this.lastRead = lastRead;
     }
 }

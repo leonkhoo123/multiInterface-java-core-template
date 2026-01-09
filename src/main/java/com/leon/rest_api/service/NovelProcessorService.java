@@ -29,6 +29,8 @@ public class NovelProcessorService {
     private final NovelInfoRepository novelInfoRepository;
     private final NovelContentRepository novelContentRepository;
 
+    private static final int fontCount = 300; //how many character per row
+
     public NovelProcessorService(TextFileUtils textFileUtils, AiService aiService,
                                  NovelInfoRepository novelInfoRepository,
                                  NovelContentRepository novelContentRepository) {
@@ -102,7 +104,7 @@ public class NovelProcessorService {
             // We will update seqCount and characterCount after processing
             novelInfo.setSeqCount(0L);
             novelInfo.setCharacterCount(0L);
-
+            novelInfo.setOwnerUsername("leonkhoo");
             // Save initially to ensure ID exists if needed, though we update later
             novelInfo = novelInfoRepository.save(novelInfo);
 
@@ -122,8 +124,8 @@ public class NovelProcessorService {
                     buffer.append(line).append('\n');
                     totalCharacterCount += line.length();
 
-                    //if buffer more than 400 character
-                    if(buffer.length()>=500) {
+                    //if buffer more than 300 character
+                    if(buffer.length()>=fontCount) {
                         NovelContent content = new NovelContent();
                         content.setNovelId(novelId);
                         content.setSeqNo(seqNo++);
