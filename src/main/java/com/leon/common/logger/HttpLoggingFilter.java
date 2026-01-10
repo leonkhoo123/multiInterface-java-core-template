@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
@@ -24,8 +25,10 @@ public class HttpLoggingFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(HttpLoggingFilter.class);
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private static final Set<String> SENSITIVE_ENDPOINTS = Set.of("/api/v1/login");
-    private static final Set<String> EXCLUDED_PATHS = Set.of("/index.html", "/favicon.ico");
+    private static final Set<String> EXCLUDED_PATHS = Set.of("/index.html", "/favicon.ico", "/web/**", "/js/**");
     private static final String REQUEST_ID_KEY = "requestId";
+    
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
     public void doFilter(jakarta.servlet.ServletRequest request, jakarta.servlet.ServletResponse response,
@@ -33,7 +36,7 @@ public class HttpLoggingFilter implements Filter {
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         // Skip logging for excluded paths
-        if (EXCLUDED_PATHS.contains(httpRequest.getRequestURI())) {
+        if (EXCLUDED_PATHS.stream().anyMatch(p -> pathMatcher.match(p, httpRequest.getRequestURI()))) {
             chain.doFilter(request, response);
             return;
         }
