@@ -21,7 +21,14 @@ const novelId = urlParams.get('novelId');
 const fontPlusBtn = document.getElementById("font-plus");
 const fontMinusBtn = document.getElementById("font-minus");
 const novelNameTitle = document.getElementById("novel-name");
+const backBtn = document.getElementById("back-button");
+const bottomBar = document.getElementById("btm-bar");
+const progressFill = document.getElementById('progress-fill');
+const progressText = document.getElementById('progress-text');
 const FONT_STORAGE_KEY = "novelSite-fontsize";
+
+// ==== NOVEL INFO ===
+let totalSeq = 0;
 
 function loadFontSize() {
     const stored = localStorage.getItem(FONT_STORAGE_KEY);
@@ -37,6 +44,12 @@ function saveFontSize(size) {
 
 function applyFontSize(size) {
     container.style.fontSize = `${size}rem`;
+}
+
+function updateProgressUi(seq){
+    const percentage = totalSeq > 0 ? ((seq / totalSeq) * 100).toFixed(2) : "0.00";
+    progressText.textContent = `${percentage}% (${seq}/${totalSeq})`;
+    progressFill.style.width = `${percentage}%`;
 }
 
 let currentFontSize = loadFontSize();
@@ -56,12 +69,17 @@ fontMinusBtn.addEventListener("click", () => {
     }
 });
 
+backBtn.addEventListener("click",()=> {
+    window.location.href = '/web/index.html';
+});
+
 // ==== PROGRESS TRACKING ====
 let lastUpdateTimestamp = 0;
 let updateTimeout = null;
 let lastSentSeq = -1;
 
 function sendUpdate(seqNo) {
+    updateProgressUi(seqNo);
     lastUpdateTimestamp = Date.now();
     lastSentSeq = seqNo;
     updateTimeout = null;
@@ -92,6 +110,15 @@ function triggerProgressUpdate(seqNo) {
 async function fetchSection(index) {
   if (sectionCache.has(index)) return sectionCache.get(index);
 
+  // if sequence = 0
+  if (index === 0) {
+    return `<section data-index="${index}"><div>=== Start ===</div></section>`
+  }
+  if (index > totalSeq) {
+//    return `<section data-index="${index}"><div>=== End ===</div></section>`
+    return null
+  }
+
   // If a fetch is already in progress for this index, return that promise
   if (pendingFetches.has(index)) return pendingFetches.get(index);
 
@@ -114,7 +141,8 @@ async function fetchSection(index) {
           return html;
       } catch (error) {
           console.error(`Error fetching section ${index}:`, error);
-          return `<section data-index="${index}"><p>Error loading content.</p></section>`;
+//          return `<section data-index="${index}"><p>Error loading content.</p></section>`;
+            return null
       } finally {
           pendingFetches.delete(index);
       }
@@ -159,11 +187,11 @@ async function ensureSections(rangeStart, rangeEnd) {
   // Create an array of promises for the range
   const promises = [];
   for (let i = rangeStart; i < rangeEnd; i++) {
-    if (sectionMap.has(i)) {
-      promises.push(Promise.resolve({ index: i, html: null, exists: true }));
-    } else {
-      promises.push(fetchSection(i).then(html => ({ index: i, html, exists: false })));
-    }
+        if (sectionMap.has(i)) {
+          promises.push(Promise.resolve({ index: i, html: null, exists: true }));
+        } else {
+          promises.push(fetchSection(i).then(html => ({ index: i, html, exists: false })));
+        }
   }
 
   // Wait for all to resolve
@@ -171,6 +199,7 @@ async function ensureSections(rangeStart, rangeEnd) {
 
   // Append/Insert in correct order
   for (const result of results) {
+    if (!result || result.html === null) continue;
     // Double check if it exists now (race condition check)
     if (sectionMap.has(result.index)) continue;
 
@@ -281,7 +310,10 @@ async function syncLatestChapter() {
         const response = await apiClient.get(`auth/novel/getUserNovelProgress/${novelId}`);
         if (response.data.success) {
             const serverSeq = response.data.data.readUntil;
+            totalSeq = response.data.data.totalSeq;
             novelNameTitle.textContent = response.data.data.novelName;
+            updateProgressUi(serverSeq);
+
             // Determine current visible section
             let currentVisible = -1;
             const children = container.children;

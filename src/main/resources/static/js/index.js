@@ -16,18 +16,30 @@ async function loadNovels() {
         }
 
         listContainer.innerHTML = novels.map(novel => {
-            const percentage = novel.seqCount > 0 ? ((novel.readUntil / novel.seqCount) * 100).toFixed(1) : '0.0';
-            const lastReadDate = novel.lastRead ? new Date(novel.lastRead).toLocaleString() : null;
+            const rawPercent = novel.seqCount > 0 ? (novel.readUntil / novel.seqCount) * 100 : 0;
+            const percentage = rawPercent.toFixed(2);
+            const lastReadDate = novel.lastRead ? new Date(novel.lastRead).toLocaleDateString(undefined, {
+                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            }) : null;
+
+            // Formatter for large numbers (e.g., 1.2M chars)
+            const charCount = new Intl.NumberFormat('en-US', { notation: 'compact' }).format(novel.characterCount);
 
             return `
             <div class="novel-card" onclick="openReader(${novel.novelId}, ${novel.readUntil})">
                 <div class="novel-title">${escapeHtml(novel.novelName || 'Untitled')}</div>
+
                 <div class="novel-info">
-                   <span>Length: ${novel.characterCount}</span> |
-                    <span>Progress: ${percentage}%</span>
-                    <br><span style="font-size: 0.9em; color: #555;">
-                        ${lastReadDate ? `Last Read: ${lastReadDate}` : 'New'}
-                    </span>
+                    <span class="badge">📖 ${charCount} chars</span>
+                    <span class="badge">🎯 ${percentage}%</span>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: ${percentage}%"></div>
+                </div>
+
+                <div class="last-read">
+                    ${lastReadDate ? `🕒 Last read: ${lastReadDate}` : '✨ <span style="color:#3498db">New Novel</span>'}
                 </div>
             </div>
         `}).join('');

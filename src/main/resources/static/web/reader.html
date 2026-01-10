@@ -9,18 +9,21 @@
     margin: 0;
     background: #ddd8d2;
     color: #eee;
-    font-family: system-ui, sans-serif;
     line-height: 1.8;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
   }
   #reader {
     height: 100vh;
     overflow-y: auto;
-    padding: 1rem;
-    max-width: 600px;
-    margin: 0 auto;
-    scrollbar-width: none;        /* Firefox */
-    -ms-overflow-style: none;     /* IE / old Edge */
+    width: 100%;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     color: #0a0a0a;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
   }
   #reader::-webkit-scrollbar {
   display: none;                /* Chrome / Safari / Edge */
@@ -28,33 +31,61 @@
   section {
     padding: 0px;
     margin: 0px;
+    max-width: 600px;
+    padding-left: 1.8rem;
+    padding-right: 1.4rem;
   }
   .topbar {
-    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     height: 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 1rem;
-    box-sizing: border-box;
     background: #222;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
   .font-controls button {
     cursor: pointer;
     margin-left: 5px;
   }
+  .btm-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1.1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #5b5753;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    z-index: 100;
+    font-size: small;
+  }
 </style>
 </head>
 <body>
 <div id="topbar" class="topbar">
+  <div id="back-button" style="display: flex; align-items: center; width: 7rem;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></div>
   <div id="novel-name" >Novel Name</div>
-  <div class="font-controls">
-    <button id="font-plus" style="width:3rem">A+</button>
-    <button id="font-minus" style="width:3rem">A-</button>
+  <div class="font-controls" style="height: 100%;align-content: center;">
+    <button id="font-plus" style="width: 3rem; height: 80%;">A+</button>
+    <button id="font-minus" style="width: 3rem; height: 80%;">A-</button>
   </div>
 </div>
-<div id="reader"><div id="sections"></div></div>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<div id="reader">
+  <div id="sections"></div>
+  <div style="height: 1.1rem;">___</div>
+</div>
+<div id="btm-bar" class="btm-bar">
+  <div id="progress-fill" style="position:absolute; top:0; left:0; height:100%; background:rgba(255,255,255,0.1); width:0%;"></div>
+  <span id="progress-text">0% (0/0)</span>
+</div><script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="/js/axios-config.js"></script>
 <script src="/js/reader.js"></script>
 </body>
