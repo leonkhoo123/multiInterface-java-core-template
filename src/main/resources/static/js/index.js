@@ -58,7 +58,7 @@ async function loadNovels() {
 
 // Function to redirect to reader
 function openReader(novelId, readUntil) {
-    window.location.href = `/web/reader.html?novelId=${novelId}&nextSeqId=${readUntil}`;
+    window.location.href = `/web/reader.html?novelId=${novelId}`;
 }
 
 // Utility to prevent XSS
