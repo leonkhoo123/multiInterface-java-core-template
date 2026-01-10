@@ -20,7 +20,6 @@ public class PasswordGeneratorTest {
         String hash2 = encoder.encode(rawPassword);
 
         System.out.println("Hash 1: " + hash1);
-        System.out.println("Hash 2: " + hash2);
 
         // 3. Even though the password is the same, the hashes are DIFFERENT.
         // This proves the salt is working and unique per execution.
