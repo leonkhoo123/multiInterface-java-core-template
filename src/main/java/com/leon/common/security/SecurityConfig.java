@@ -46,7 +46,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // 1. Swagger / API Docs - Public
-                        .requestMatchers("/api-docs/**", "/swagger-ui/**").permitAll()
+                        .requestMatchers("/api-docs/**", "/swagger-ui/**", "/actuator/health/**").permitAll()
                         // 2. Static Resources (HTML, JS) - Allow root, index, and js folder
                         .requestMatchers("/","/favicon.ico", "/web/**", "/js/**").permitAll()
                         // 2. Protected Routes: /api/v1/auth/** requires authentication

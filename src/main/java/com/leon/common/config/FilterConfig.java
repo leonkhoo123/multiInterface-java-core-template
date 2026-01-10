@@ -9,11 +9,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class FilterConfig {
 
-    @Bean
-    public HttpLoggingFilter httpLoggingFilter() {
-        return new HttpLoggingFilter();
-    }
-
     /**
      * Prevent Spring Boot from automatically registering HttpLoggingFilter as a global filter.
      * We only want it in the Security Filter Chain.
