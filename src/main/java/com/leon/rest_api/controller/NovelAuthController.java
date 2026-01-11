@@ -4,10 +4,7 @@ import com.leon.common.dto.response.CommonResponse;
 import com.leon.common.security.JwtTokenUtils;
 import com.leon.rest_api.dto.request.NovelContentRequest;
 import com.leon.rest_api.dto.request.UpdateUserNovelProgressRequest;
-import com.leon.rest_api.dto.response.GetNovelListResponse;
-import com.leon.rest_api.dto.response.GetUserNovelProgressResponse;
-import com.leon.rest_api.dto.response.NovelContentResponse;
-import com.leon.rest_api.dto.response.NovelResponse;
+import com.leon.rest_api.dto.response.*;
 import com.leon.rest_api.service.NovelService;
 import com.leon.rest_api.service.NovelUserProgressService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,6 +13,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -71,6 +69,14 @@ public class NovelAuthController {
         String accessToken = jwtTokenUtils.getJwtFromRequest(request);
         String username = jwtTokenUtils.getUsernameFromToken(accessToken);
         GetUserNovelProgressResponse response = novelUserProgressService.getUserNovelProgress(username, novelId);
+        return ResponseEntity.ok(CommonResponse.success("", response));
+    }
+
+    @GetMapping("/getUserLastRead")
+    public ResponseEntity<CommonResponse<GetUserLastReadResponse>> getUserLastRead(HttpServletRequest request){
+        String accessToken = jwtTokenUtils.getJwtFromRequest(request);
+        String username = jwtTokenUtils.getUsernameFromToken(accessToken);
+        GetUserLastReadResponse response = novelUserProgressService.getUserLastRead(username);
         return ResponseEntity.ok(CommonResponse.success("", response));
     }
 }

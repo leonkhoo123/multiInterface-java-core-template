@@ -70,7 +70,7 @@ fontMinusBtn.addEventListener("click", () => {
 });
 
 backBtn.addEventListener("click",()=> {
-    window.location.href = '/web/index.html';
+    window.location.href = '/web/index.html?stay=true';
 });
 
 // ==== PROGRESS TRACKING ====

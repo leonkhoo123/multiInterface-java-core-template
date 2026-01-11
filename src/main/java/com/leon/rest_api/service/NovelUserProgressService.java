@@ -1,6 +1,7 @@
 package com.leon.rest_api.service;
 
 import com.leon.rest_api.dto.request.UpdateUserNovelProgressRequest;
+import com.leon.rest_api.dto.response.GetUserLastReadResponse;
 import com.leon.rest_api.dto.response.GetUserNovelProgressResponse;
 import com.leon.rest_api.entities.NovelInfo;
 import com.leon.rest_api.entities.NovelUserProgress;
@@ -57,6 +58,16 @@ public class NovelUserProgressService {
         response.setNovelId(novelId);
         response.setNovelName(novelInfo.getNovelName());
         response.setTotalSeq(novelInfo.getSeqCount());
+        return response;
+    }
+
+    @Transactional(readOnly = true)
+    public GetUserLastReadResponse getUserLastRead(String username) {
+        //update user reading progress
+        GetUserLastReadResponse response = new GetUserLastReadResponse();
+        NovelUserProgress novelUserProgress = novelUserProgressRepository.findLastReadNovel(username)
+                .orElseThrow(()-> new NovelNotFoundException("User Never Read Anything yet"));
+        response.setNovelId(novelUserProgress.getNovelId());
         return response;
     }
 }

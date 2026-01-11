@@ -1,3 +1,23 @@
+// Function to check if user has a last read novel and redirect
+async function checkLastRead() {
+    // Check if URL has stay=true parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('stay') === 'true') {
+        return;
+    }
+
+    try {
+        const response = await apiClient.get('/private/novel/getUserLastRead');
+        const result = response.data;
+        if (result.success && result.data && result.data.novelId) {
+            window.location.href = `/web/reader.html?novelId=${result.data.novelId}`;
+        }
+    } catch (error) {
+        // User never read anything or other error, stay on index page
+        console.log('Check last read status:', error);
+    }
+}
+
 // Function to fetch and display novels
 async function loadNovels() {
     const listContainer = document.getElementById('novel-list');
@@ -92,4 +112,7 @@ function escapeHtml(text) {
 }
 
 // Initialize
-document.addEventListener('DOMContentLoaded', loadNovels);
+document.addEventListener('DOMContentLoaded', () => {
+    checkLastRead();
+    loadNovels();
+});

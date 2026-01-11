@@ -5,6 +5,7 @@ import com.leon.rest_api.entities.NovelUserProgress;
 import com.leon.rest_api.entities.NovelUserProgress_pk;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,4 +17,8 @@ public interface NovelUserProgressRepository extends JpaRepository<NovelUserProg
     Optional<NovelUserProgress> findByUsernameAndNovelId(String username, Long novelId);
 
     List<NovelUserProgress> findByUsername(String username);
+
+    @Query("SELECT n FROM NovelUserProgress n WHERE n.username = ?1 ORDER BY n.lastRead DESC limit 1")
+    Optional<NovelUserProgress> findLastReadNovel(String username);
+
 }
