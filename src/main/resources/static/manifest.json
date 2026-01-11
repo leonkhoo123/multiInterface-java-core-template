@@ -3,8 +3,8 @@
   "short_name": "Novels",
   "start_url": "/web/index.html",
   "display": "standalone",
-  "background_color": "#f8f9fa",
-  "theme_color": "#3498db",
+  "background_color": "#222222",
+  "theme_color": "#222222",
   "icons": [
     {
       "src": "/icon.png",
