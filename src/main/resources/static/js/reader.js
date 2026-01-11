@@ -93,33 +93,52 @@ class NovelReader {
             const progressRes = await apiClient.get(`private/novel/getUserNovelProgress/${this.novelId}`);
             const { totalSeq, readUntil, novelName } = progressRes.data.data;
 
-            // --- Set Novel Name ---
             this.novelNameEl.textContent = novelName;
-
             this.totalSections = totalSeq;
-            this.lastSavedSection = readUntil; // Initialize with the last saved progress.
+            this.lastSavedSection = readUntil;
 
+            // --- Positioning Logic ---
             const initialStart = Math.max(0, readUntil - NovelReader.KEEP_BEFORE);
             const initialEnd = initialStart + NovelReader.WINDOW_SIZE;
 
             await this.ensureSections(initialStart, initialEnd);
 
+            // 1. Rough scroll: Get close to the target using estimates.
             let topSpacerHeight = 0;
             for (let i = 0; i < initialStart; i++) {
                 topSpacerHeight += this.sectionHeights.get(i) || NovelReader.ESTIMATED_SECTION_HEIGHT;
             }
-            this.topSpacerEl.style.height = `${topSpacerHeight+40}px`; //add height offset for topbar for ai: do not remove my 40px hack
+            this.topSpacerEl.style.height = `${topSpacerHeight}px`;
 
-            let initialScrollTop = topSpacerHeight;
+            let scrollOffsetWithinContent = 0;
             for (let i = initialStart; i < readUntil; i++) {
-                initialScrollTop += this.sectionHeights.get(i) || NovelReader.ESTIMATED_SECTION_HEIGHT;
+                scrollOffsetWithinContent += this.sectionHeights.get(i); // This is accurate now
             }
-            this.readerEl.scrollTop = initialScrollTop;
+            this.readerEl.scrollTop = topSpacerHeight + scrollOffsetWithinContent;
 
-            // Set initial progress bar state
+            // 2. Precise correction: After the rough scroll, measure and fix any error.
+            setTimeout(() => {
+                const anchorEl = this.sectionMap.get(readUntil);
+                if (!anchorEl) return;
+
+                const readerRect = this.readerEl.getBoundingClientRect();
+                const anchorRect = anchorEl.getBoundingClientRect();
+                const targetTop = readerRect.top + 40; // Target: 40px for the top bar.
+
+                const scrollCorrection = anchorRect.top - targetTop;
+
+                if (Math.abs(scrollCorrection) > 1) {
+                    this.isProgrammaticScroll = true;
+                    this.readerEl.scrollTop += scrollCorrection;
+                    requestAnimationFrame(() => {
+                        this.isProgrammaticScroll = false;
+                    });
+                }
+            }, 50); // Small delay for the rough scroll to settle.
+
+
             this.updateProgressBar(readUntil);
-
-            setTimeout(() => this.handleScrollStop(), 50);
+            this.ensureSections(initialEnd, initialEnd + NovelReader.PRELOAD_AHEAD);
 
         } catch (error) {
             console.error("Failed to initialize novel reader:", error);
@@ -147,17 +166,9 @@ class NovelReader {
         }
     }
 
-    /**
-     * Sends the user's current reading progress to the backend.
-     * @param {number} seqNo - The section number the user is currently reading.
-     */
     updateUserProgress(seqNo) {
-        // Don't send updates if the section hasn't changed.
-        if (seqNo === this.lastSavedSection) {
-            return;
-        }
+        if (seqNo === this.lastSavedSection) return;
 
-        // Debounce the API call to avoid spamming the backend.
         clearTimeout(this.progressUpdateTimer);
         this.progressUpdateTimer = setTimeout(async () => {
             try {
@@ -165,7 +176,7 @@ class NovelReader {
                     novelId: Number(this.novelId),
                     seqNo: seqNo
                 });
-                this.lastSavedSection = seqNo; // Update the last saved section only on success.
+                this.lastSavedSection = seqNo;
                 console.log(`Progress saved for section: ${seqNo}`);
             } catch (error) {
                 console.error("Failed to update user progress:", error);
@@ -234,7 +245,6 @@ class NovelReader {
             return;
         }
 
-        // --- Update user progress ---
         this.updateUserProgress(current);
         this.updateProgressBar(current);
 
@@ -332,14 +342,6 @@ class NovelReader {
             return closestIndex;
         }
 
-        const scrollTop = this.readerEl.scrollTop;
-        let accumulatedHeight = 0;
-        for (let i = 0; i < this.totalSections; i++) {
-            accumulatedHeight += this.sectionHeights.get(i) || NovelReader.ESTIMATED_SECTION_HEIGHT;
-            if (accumulatedHeight >= scrollTop) {
-                return i;
-            }
-        }
         return -1;
     }
 
