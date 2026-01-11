@@ -83,13 +83,13 @@ class NovelReader {
 
     async init() {
         try {
-            // --- Safety Net: Clear cache from other novels on startup ---
             this._clearOldNovelCache();
 
             this.backButtonEl.addEventListener('click', () => {
                 window.location.href = '/web/index.html?stay=true';
             });
             this.readerEl.addEventListener("scroll", this.onScroll.bind(this));
+            document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
 
             const progressRes = await apiClient.get(`private/novel/getUserNovelProgress/${this.novelId}`);
             const { totalSeq, readUntil, novelName } = progressRes.data.data;
@@ -101,7 +101,7 @@ class NovelReader {
             const initialStart = Math.max(0, readUntil - NovelReader.KEEP_BEFORE);
             const initialEnd = initialStart + NovelReader.WINDOW_SIZE;
 
-            await this.ensureSections(initialStart, initialEnd);
+            await this.ensureSectionsInDom(initialStart, initialEnd);
 
             let topSpacerHeight = 0;
             for (let i = 0; i < initialStart; i++) {
@@ -135,7 +135,7 @@ class NovelReader {
             }, 50);
 
             this.updateProgressBar(readUntil);
-            this.ensureSections(initialEnd, initialEnd + NovelReader.PRELOAD_AHEAD);
+            this.preloadSections(initialEnd, initialEnd + NovelReader.PRELOAD_AHEAD);
 
         } catch (error) {
             console.error("Failed to initialize novel reader:", error);
@@ -226,7 +226,16 @@ class NovelReader {
         }
     }
 
-    async ensureSections(start, end) {
+    preloadSections(start, end) {
+        start = Math.max(0, start);
+        end = Math.min(this.totalSections, end);
+
+        for (let i = start; i < end; i++) {
+            this.fetchSection(i);
+        }
+    }
+
+    async ensureSectionsInDom(start, end) {
         start = Math.max(0, start);
         end = Math.min(this.totalSections, end);
 
@@ -282,8 +291,8 @@ class NovelReader {
         const newStart = Math.max(0, current - NovelReader.KEEP_BEFORE);
         const newEnd = newStart + NovelReader.WINDOW_SIZE;
 
-        await this.ensureSections(newStart, newEnd);
-        await this.ensureSections(newEnd, newEnd + NovelReader.PRELOAD_AHEAD);
+        this.preloadSections(newEnd, newEnd + NovelReader.PRELOAD_AHEAD);
+        await this.ensureSectionsInDom(newStart, newEnd);
 
         for (const [idx, el] of this.sectionMap) {
             if (idx < newStart || idx >= newEnd) {
@@ -291,7 +300,6 @@ class NovelReader {
                 el.remove();
                 this.sectionMap.delete(idx);
 
-                // --- Aggressive cache clearing ---
                 const key = `novel-${this.novelId}-${idx}`;
                 localStorage.removeItem(key);
             }
@@ -355,7 +363,7 @@ class NovelReader {
 
     detectCurrentIndex() {
         const readerRect = this.readerEl.getBoundingClientRect();
-        const viewportCenter = readerRect.top + readerRect.height / 2;
+        const detectionLine = readerRect.top + (readerRect.height * 0.3); // 30% from the top
 
         let closestIndex = -1;
         let smallestDistance = Infinity;
@@ -364,7 +372,7 @@ class NovelReader {
             for (const [index, element] of this.sectionMap.entries()) {
                 const elementRect = element.getBoundingClientRect();
                 const elementCenter = elementRect.top + elementRect.height / 2;
-                const distance = Math.abs(elementCenter - viewportCenter);
+                const distance = Math.abs(elementCenter - detectionLine);
 
                 if (distance < smallestDistance) {
                     smallestDistance = distance;
@@ -386,6 +394,23 @@ class NovelReader {
         this.scrollStopTimer = setTimeout(() => {
             this.handleScrollStop();
         }, NovelReader.SCROLL_STOP_DELAY);
+    }
+
+    async handleVisibilityChange() {
+        if (document.visibilityState === 'visible') {
+            try {
+                const progressRes = await apiClient.get(`private/novel/getUserNovelProgress/${this.novelId}`);
+                const { readUntil: remoteReadUntil } = progressRes.data.data;
+
+                const currentIndex = this.detectCurrentIndex();
+
+                if (remoteReadUntil > currentIndex + 1) {
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error("Failed to check for remote progress:", error);
+            }
+        }
     }
 }
 
