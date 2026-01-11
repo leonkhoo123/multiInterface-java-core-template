@@ -3,7 +3,7 @@ const container = document.getElementById("sections");
 
 // ==== CONFIG ====
 let currentStart = 0;
-let currentEnd = 12;           // start with 12 visible
+let currentEnd = 1;           // start with 12 visible
 const keepBefore = 2;          // keep 2 behind
 const preloadAhead = 10;       // load 10 ahead
 const totalSections = 200;
@@ -337,7 +337,7 @@ async function syncLatestChapter() {
             // Keep sectionCache to avoid re-fetching if possible
 
             currentStart = serverSeq;
-            currentEnd = currentStart + 12;
+            currentEnd = currentStart + preloadAhead;
 
             await ensureSections(currentStart, currentEnd);
             reader.scrollTop = 0;
@@ -348,7 +348,7 @@ async function syncLatestChapter() {
         if (sectionMap.size === 0) {
              const fallback = parseInt(urlParams.get('nextSeqId')) || 0;
              currentStart = fallback;
-             currentEnd = currentStart + 12;
+             currentEnd = currentStart + preloadAhead;
              await ensureSections(currentStart, currentEnd);
         }
     }
