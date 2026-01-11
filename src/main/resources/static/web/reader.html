@@ -7,6 +7,9 @@
 <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#222222">
 <style>
+  * {
+    box-sizing: border-box;
+  }
   body {
     margin: 0;
     background: #ddd8d2;
@@ -36,6 +39,8 @@
     max-width: 600px;
     padding-left: 1.8rem;
     padding-right: 1.4rem;
+    overflow-wrap: anywhere;
+    word-wrap: break-word;
   }
   .topbar {
     position: fixed;
@@ -81,7 +86,7 @@
   </div>
 </div>
 <div id="reader">
-  <div id="sections"></div>
+  <div id="sections" style="max-width:100%"></div>
   <div style="height: 1.1rem;">___</div>
 </div>
 <div id="btm-bar" class="btm-bar">
