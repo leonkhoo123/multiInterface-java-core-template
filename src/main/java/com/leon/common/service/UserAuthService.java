@@ -79,7 +79,7 @@ public class UserAuthService {
             if (attributes != null) {
                 HttpServletRequest httpRequest = attributes.getRequest();
                 userAgent = httpRequest.getHeader("User-Agent");
-                ipAddress = httpRequest.getRemoteAddr();
+                ipAddress = httpRequest.getHeader("X-Real-IP");
             }
 
             // Save refresh token

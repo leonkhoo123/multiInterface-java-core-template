@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Novel Reader — Smooth Bidirectional</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#3498db">
 <style>
   body {
     margin: 0;
@@ -88,5 +90,12 @@
 </div><script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="/js/axios-config.js"></script>
 <script src="/js/reader.js"></script>
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js');
+        });
+    }
+</script>
 </body>
 </html>
