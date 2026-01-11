@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Novel List</title>
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/web/manifest.json">
     <meta name="theme-color" content="#3498db">
 
     <!-- Axios CDN -->
@@ -147,6 +147,7 @@
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
+            // Register the SW at the root scope so it can control /web/ pages
             navigator.serviceWorker.register('/sw.js')
                 .then(registration => {
                     console.log('ServiceWorker registration successful');
