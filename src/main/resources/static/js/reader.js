@@ -53,8 +53,8 @@ class NovelReader {
     static ESTIMATED_SECTION_HEIGHT = 800;
     static SCROLL_STOP_DELAY = 150;
     static PROGRESS_UPDATE_DELAY = 1000;
-    // Max height for a single spacer div to prevent mobile browser rendering issues.
-    static MAX_SPACER_HEIGHT = 5000000; // 5 million pixels
+    static MAX_SPACER_HEIGHT = 2000000;
+    static TOTAL_SPACER_CAP = 15000000;
 
     constructor(novelId) {
         this.novelId = novelId;
@@ -83,6 +83,9 @@ class NovelReader {
 
     async init() {
         try {
+            // --- Safety Net: Clear cache from other novels on startup ---
+            this._clearOldNovelCache();
+
             this.backButtonEl.addEventListener('click', () => {
                 window.location.href = '/web/index.html?stay=true';
             });
@@ -108,9 +111,9 @@ class NovelReader {
 
             let scrollOffsetWithinContent = 0;
             for (let i = initialStart; i < readUntil; i++) {
-                scrollOffsetWithinContent += this.sectionHeights.get(i);
+                scrollOffsetWithinContent += this.sectionHeights.get(i) || NovelReader.ESTIMATED_SECTION_HEIGHT;
             }
-            this.readerEl.scrollTop = topSpacerHeight + scrollOffsetWithinContent;
+            this.readerEl.scrollTop = Math.min(topSpacerHeight, NovelReader.TOTAL_SPACER_CAP) + scrollOffsetWithinContent;
 
             setTimeout(() => {
                 const anchorEl = this.sectionMap.get(readUntil);
@@ -140,6 +143,22 @@ class NovelReader {
     }
 
     // ===== DATA & API =====
+
+    _clearOldNovelCache() {
+        const currentNovelPrefix = `novel-${this.novelId}-`;
+        const keysToRemove = [];
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('novel-') && !key.startsWith(currentNovelPrefix)) {
+                keysToRemove.push(key);
+            }
+        }
+
+        for (const key of keysToRemove) {
+            localStorage.removeItem(key);
+        }
+    }
 
     async fetchSection(index) {
         const key = `novel-${this.novelId}-${index}`;
@@ -192,17 +211,13 @@ class NovelReader {
         }
     }
 
-    /**
-     * Creates and manages multiple smaller spacer divs to avoid hitting browser
-     * height limits on mobile devices.
-     * @param {number} totalHeight - The total required height for the top spacer.
-     */
     updateTopSpacers(totalHeight) {
         this.topSpacerContainerEl.innerHTML = '';
-        if (totalHeight <= 0) return;
+        const cappedHeight = Math.min(totalHeight, NovelReader.TOTAL_SPACER_CAP);
+        if (cappedHeight <= 0) return;
 
-        const numSpacers = Math.ceil(totalHeight / NovelReader.MAX_SPACER_HEIGHT);
-        const heightPerSpacer = totalHeight / numSpacers;
+        const numSpacers = Math.ceil(cappedHeight / NovelReader.MAX_SPACER_HEIGHT);
+        const heightPerSpacer = cappedHeight / numSpacers;
 
         for (let i = 0; i < numSpacers; i++) {
             const spacer = document.createElement('div');
@@ -275,6 +290,10 @@ class NovelReader {
                 this.sectionHeights.set(idx, el.offsetHeight);
                 el.remove();
                 this.sectionMap.delete(idx);
+
+                // --- Aggressive cache clearing ---
+                const key = `novel-${this.novelId}-${idx}`;
+                localStorage.removeItem(key);
             }
         }
 
