@@ -2,7 +2,7 @@
  * Manages font size adjustments and persists the setting to localStorage.
  */
 class FontSizeManager {
-    static STORAGE_KEY = 'novel-font-size';
+    static STORAGE_KEY = 'novelSite-fontsize';
     static STEP = 0.1;
     static MIN_SIZE = 0.5;
     static MAX_SIZE = 2.0;
