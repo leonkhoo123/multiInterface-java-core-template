@@ -48,8 +48,11 @@ public class SecurityConfig {
                         // Swagger (disable or restrict in prod)
                         .requestMatchers("/api-docs/**", "/swagger-ui/**").permitAll()
 
+                        // Special handling for static resources
+                        .requestMatchers("/favicon.ico","/manifest.json","/sw.js").permitAll()
+
                         // Static + internal (k8s probes)
-                        .requestMatchers("/favicon.ico", "/web/**", "/js/**", "/internal/**").permitAll()
+                        .requestMatchers("/web/**", "/js/**", "/internal/**").permitAll()
 
                         // Auth endpoints
                         .requestMatchers("/api/v1/auth/**").permitAll()
