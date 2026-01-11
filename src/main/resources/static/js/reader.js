@@ -52,14 +52,15 @@ class NovelReader {
     static PRELOAD_AHEAD = 10;
     static ESTIMATED_SECTION_HEIGHT = 800;
     static SCROLL_STOP_DELAY = 150;
-    // Delay before sending a progress update to the backend.
     static PROGRESS_UPDATE_DELAY = 1000;
+    // Max height for a single spacer div to prevent mobile browser rendering issues.
+    static MAX_SPACER_HEIGHT = 5000000; // 5 million pixels
 
     constructor(novelId) {
         this.novelId = novelId;
         this.readerEl = document.getElementById("reader");
         this.containerEl = document.getElementById("sections");
-        this.topSpacerEl = document.getElementById("top-spacer");
+        this.topSpacerContainerEl = document.getElementById("top-spacer-container");
         this.novelNameEl = document.getElementById("novel-name");
         this.backButtonEl = document.getElementById("back-button");
         this.progressFillEl = document.getElementById("progress-fill");
@@ -73,7 +74,6 @@ class NovelReader {
         this.isProgrammaticScroll = false;
         this.scrollStopTimer = null;
 
-        // --- Progress Tracking ---
         this.lastSavedSection = -1;
         this.progressUpdateTimer = null;
 
@@ -83,12 +83,10 @@ class NovelReader {
 
     async init() {
         try {
-            // --- Event Listeners ---
             this.backButtonEl.addEventListener('click', () => {
                 window.location.href = '/web/index.html?stay=true';
             });
             this.readerEl.addEventListener("scroll", this.onScroll.bind(this));
-
 
             const progressRes = await apiClient.get(`private/novel/getUserNovelProgress/${this.novelId}`);
             const { totalSeq, readUntil, novelName } = progressRes.data.data;
@@ -97,33 +95,30 @@ class NovelReader {
             this.totalSections = totalSeq;
             this.lastSavedSection = readUntil;
 
-            // --- Positioning Logic ---
             const initialStart = Math.max(0, readUntil - NovelReader.KEEP_BEFORE);
             const initialEnd = initialStart + NovelReader.WINDOW_SIZE;
 
             await this.ensureSections(initialStart, initialEnd);
 
-            // 1. Rough scroll: Get close to the target using estimates.
             let topSpacerHeight = 0;
             for (let i = 0; i < initialStart; i++) {
                 topSpacerHeight += this.sectionHeights.get(i) || NovelReader.ESTIMATED_SECTION_HEIGHT;
             }
-            this.topSpacerEl.style.height = `${topSpacerHeight}px`;
+            this.updateTopSpacers(topSpacerHeight);
 
             let scrollOffsetWithinContent = 0;
             for (let i = initialStart; i < readUntil; i++) {
-                scrollOffsetWithinContent += this.sectionHeights.get(i); // This is accurate now
+                scrollOffsetWithinContent += this.sectionHeights.get(i);
             }
             this.readerEl.scrollTop = topSpacerHeight + scrollOffsetWithinContent;
 
-            // 2. Precise correction: After the rough scroll, measure and fix any error.
             setTimeout(() => {
                 const anchorEl = this.sectionMap.get(readUntil);
                 if (!anchorEl) return;
 
                 const readerRect = this.readerEl.getBoundingClientRect();
                 const anchorRect = anchorEl.getBoundingClientRect();
-                const targetTop = readerRect.top + 40; // Target: 40px for the top bar.
+                const targetTop = readerRect.top + 40;
 
                 const scrollCorrection = anchorRect.top - targetTop;
 
@@ -134,8 +129,7 @@ class NovelReader {
                         this.isProgrammaticScroll = false;
                     });
                 }
-            }, 50); // Small delay for the rough scroll to settle.
-
+            }, 50);
 
             this.updateProgressBar(readUntil);
             this.ensureSections(initialEnd, initialEnd + NovelReader.PRELOAD_AHEAD);
@@ -195,6 +189,25 @@ class NovelReader {
 
             this.progressTextEl.textContent = `${percentage.toFixed(2)}% (${current}/${total})`;
             this.progressFillEl.style.width = `${percentage}%`;
+        }
+    }
+
+    /**
+     * Creates and manages multiple smaller spacer divs to avoid hitting browser
+     * height limits on mobile devices.
+     * @param {number} totalHeight - The total required height for the top spacer.
+     */
+    updateTopSpacers(totalHeight) {
+        this.topSpacerContainerEl.innerHTML = '';
+        if (totalHeight <= 0) return;
+
+        const numSpacers = Math.ceil(totalHeight / NovelReader.MAX_SPACER_HEIGHT);
+        const heightPerSpacer = totalHeight / numSpacers;
+
+        for (let i = 0; i < numSpacers; i++) {
+            const spacer = document.createElement('div');
+            spacer.style.height = `${heightPerSpacer}px`;
+            this.topSpacerContainerEl.appendChild(spacer);
         }
     }
 
@@ -270,7 +283,7 @@ class NovelReader {
             newTopSpacerHeight += this.sectionHeights.get(i) || NovelReader.ESTIMATED_SECTION_HEIGHT;
         }
 
-        this.topSpacerEl.style.height = `${newTopSpacerHeight}px`;
+        this.updateTopSpacers(newTopSpacerHeight);
 
         if (anchorEl) {
             const newRectTop = anchorEl.getBoundingClientRect().top;
@@ -306,7 +319,7 @@ class NovelReader {
         for (let i = 0; i < currentWindowStart; i++) {
             newTopSpacerHeight += NovelReader.ESTIMATED_SECTION_HEIGHT;
         }
-        this.topSpacerEl.style.height = `${newTopSpacerHeight}px`;
+        this.updateTopSpacers(newTopSpacerHeight);
 
         if (anchorEl) {
             const newRectTop = anchorEl.getBoundingClientRect().top;
