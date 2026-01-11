@@ -3,7 +3,7 @@ const container = document.getElementById("sections");
 
 // ==== CONFIG ====
 let currentStart = 0;
-let currentEnd = 1;           // start with 12 visible
+let currentEnd = 12;           // start with 12 visible
 const keepBefore = 2;          // keep 2 behind
 const preloadAhead = 10;       // load 10 ahead
 const totalSections = 200;
