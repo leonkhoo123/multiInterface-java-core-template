@@ -54,7 +54,8 @@ class NovelReader {
     static SCROLL_STOP_DELAY = 150;
     static PROGRESS_UPDATE_DELAY = 1000;
     static MAX_SPACER_HEIGHT = 2000000;
-    static TOTAL_SPACER_CAP = 15000000;
+    // A more conservative hard cap on the total spacer height for maximum mobile compatibility.
+    static TOTAL_SPACER_CAP = 6000000; // 6 million pixels
 
     constructor(novelId) {
         this.novelId = novelId;
