@@ -3,7 +3,7 @@ async function loadNovels() {
     const listContainer = document.getElementById('novel-list');
 
     try {
-        const response = await apiClient.get('auth/novel/getNovelList');
+        const response = await apiClient.get('private/novel/getNovelList');
         const responseBody = response.data;
 
         // Updated structure based on user input
@@ -59,6 +59,25 @@ async function loadNovels() {
 // Function to redirect to reader
 function openReader(novelId, readUntil) {
     window.location.href = `/web/reader.html?novelId=${novelId}`;
+}
+
+// Function to handle logout
+async function logout() {
+    try {
+        // Call logout endpoint with empty body
+        // Headers (Bearer token) are handled by axios-config interceptor
+        const response = await apiClient.post('/auth/logout', {});
+
+        if (response.data && response.data.success) {
+            console.log(response.data.message); // "Logout successful"
+        }
+    } catch (error) {
+        console.error('Logout failed:', error);
+    } finally {
+        // Always clear token and redirect, even if server call failed
+        setAccessToken(null);
+        window.location.href = '/web/login.html';
+    }
 }
 
 // Utility to prevent XSS

@@ -45,17 +45,23 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Swagger / API Docs - Public
-                        .requestMatchers("/api-docs/**", "/swagger-ui/**", "/actuator/health/**").permitAll()
-                        // 2. Static Resources (HTML, JS) - Allow root, index, and js folder
-                        .requestMatchers("/","/favicon.ico", "/web/**", "/js/**").permitAll()
-                        // 2. Protected Routes: /api/v1/auth/** requires authentication
-                        // Defined BEFORE the generic /api/v1/** wildcard so it takes precedence
-                        .requestMatchers("/api/v1/auth/**").authenticated()
-                        // 3. Common APIs: /api/v1/** (e.g. login, guest content) are public
-                        .requestMatchers("/api/v1/**").permitAll()
-                        // 4. All other requests require authentication
-                        .anyRequest().authenticated()
+                        // Swagger (disable or restrict in prod)
+                        .requestMatchers("/api-docs/**", "/swagger-ui/**").permitAll()
+
+                        // Static + internal (k8s probes)
+                        .requestMatchers("/favicon.ico", "/web/**", "/js/**", "/internal/**").permitAll()
+
+                        // Auth endpoints
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+
+                        // Public APIs
+                        .requestMatchers("/api/v1/public/**").permitAll()
+
+                        // Protected APIs
+                        .requestMatchers("/api/v1/private/**").authenticated()
+
+                        // Default deny
+                        .anyRequest().denyAll()
                 );
 
         // Add our custom JWT filter

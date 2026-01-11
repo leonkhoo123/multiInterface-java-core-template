@@ -85,7 +85,7 @@ apiClient.interceptors.response.use(
                 console.log("Access token expired or missing. Attempting to refresh...");
 
                 // Call refresh endpoint. Cookies are sent automatically due to withCredentials: true
-                const response = await apiClient.post('/refresh');
+                const response = await apiClient.post('/auth/refresh');
 
                 // Extract new token from response
                 const newAccessToken = response.data.data?.accessToken || response.data.accessToken;

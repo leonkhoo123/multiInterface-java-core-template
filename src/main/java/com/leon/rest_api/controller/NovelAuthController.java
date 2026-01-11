@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-@RequestMapping("/api/v1/auth/novel")
+@RequestMapping("/api/v1/private/novel")
 @Tag(name = "Novel Endpoint", description = "Novel App related auth endpoint")
 @RestController
 public class NovelAuthController {

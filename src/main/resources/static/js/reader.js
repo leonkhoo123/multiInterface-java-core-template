@@ -84,7 +84,7 @@ function sendUpdate(seqNo) {
     lastSentSeq = seqNo;
     updateTimeout = null;
 
-    apiClient.post('auth/novel/updateUserNovelProgress', {
+    apiClient.post('private/novel/updateUserNovelProgress', {
         novelId: parseInt(novelId),
         seqNo: seqNo
     }).catch(e => console.error("Progress save failed", e));
@@ -124,7 +124,7 @@ async function fetchSection(index) {
 
   const fetchPromise = (async () => {
       try {
-          const response = await apiClient.post('auth/novel/novelContent', {
+          const response = await apiClient.post('private/novel/novelContent', {
               novelId: parseInt(novelId),
               nextSeqId: index
           });
@@ -307,7 +307,7 @@ async function syncLatestChapter() {
     if (!novelId) return;
 
     try {
-        const response = await apiClient.get(`auth/novel/getUserNovelProgress/${novelId}`);
+        const response = await apiClient.get(`private/novel/getUserNovelProgress/${novelId}`);
         if (response.data.success) {
             const serverSeq = response.data.data.readUntil;
             totalSeq = response.data.data.totalSeq;

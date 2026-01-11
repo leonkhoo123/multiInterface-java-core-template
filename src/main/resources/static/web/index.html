@@ -19,7 +19,7 @@
             margin: 0 auto;
             padding: 0.2rem;
             max-width: 800px;
-            display:flex
+            display:flex;
             flex-direction: column;
             align-items: center;
         }
@@ -99,13 +99,39 @@
             border-top: 1px solid #f1f5f9;
             padding-top: 12px;
         }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .logout-btn {
+            background-color: #e53e3e;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+
+        .logout-btn:hover {
+            background-color: #c53030;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="wrapper">
-        <h1 style="justify-self: center;">Novel List</h1>
+        <div class="header-container">
+            <h1>Novel List</h1>
+            <button id="logout-btn" class="logout-btn" onclick="logout()">Logout</button>
+        </div>
         <div id="novel-list">
             <div class="loading">Loading novels...</div>
         </div>

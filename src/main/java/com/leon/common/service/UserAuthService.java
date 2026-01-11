@@ -18,6 +18,7 @@ import com.leon.common.security.RefreshTokenUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -55,43 +56,46 @@ public class UserAuthService {
     public LoginResponseInterface login(LoginRequestInterface request) {
         // Authenticate user
         // This will throw BadCredentialsException if password fails, which should be handled by GlobalExceptionHandler to return 401
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
-        );
+        try{
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()
+                    )
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            // Get user details from the Authentication object (avoids a second DB query)
+            // This assumes your UserDetailsService returns your custom User entity or you can cast the principal
+            UserInterface user = userStore.findByUsername(request.getUsername())
+                    .orElseThrow(()-> new UserNotFoundException("Username Not Found"));
 
-        // Get user details from the Authentication object (avoids a second DB query)
-        // This assumes your UserDetailsService returns your custom User entity or you can cast the principal
-        UserInterface user = userStore.findByUsername(request.getUsername())
-                .orElseThrow(()-> new UserNotFoundException("Username Not Found"));
+            // Generate tokens
+            String accessToken = jwtTokenUtils.generateAccessToken(authentication);
+            String refreshToken = jwtTokenUtils.generateRefreshToken(authentication);
+            // Save refresh token
+            refreshTokenStore.saveRefreshToken(user, refreshToken);
 
-        // Generate tokens
-        String accessToken = jwtTokenUtils.generateAccessToken(authentication);
-        String refreshToken = jwtTokenUtils.generateRefreshToken(authentication);
+            // Update last login
+            user.setLastLogin(LocalDateTime.now());
+            userStore.save(user);
 
-        // Save refresh token
-        refreshTokenStore.saveRefreshToken(user, refreshToken);
+            log.info("User logged in successfully: {}", user.getUsername());
 
-        // Update last login
-        user.setLastLogin(LocalDateTime.now());
-        userStore.save(user);
-
-        log.info("User logged in successfully: {}", user.getUsername());
-
-        return new LoginResponse(
-                accessToken,
-                refreshToken,
-                "Bearer",
-                jwtTokenUtils.getAccessTokenExpiration(),
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getRoles()
-        );
+            return new LoginResponse(
+                    accessToken,
+                    refreshToken,
+                    "Bearer",
+                    jwtTokenUtils.getAccessTokenExpiration(),
+                    user.getId(),
+                    user.getUsername(),
+                    user.getEmail(),
+                    user.getRoles()
+            );
+        } catch (BadCredentialsException e){
+            log.info("Credential error ",e);
+            throw new BadCredentialsException("BadCredential");
+        }
     }
 
     @Transactional

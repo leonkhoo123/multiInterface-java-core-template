@@ -9,11 +9,27 @@ document.addEventListener('DOMContentLoaded', () => {
         errorMsg.style.display = 'none';
         errorMsg.textContent = '';
 
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        // Validate input
+        if (!username) {
+            showError('Please enter your username');
+            usernameInput.focus();
+            return;
+        }
+
+        if (!password) {
+            showError('Please enter your password');
+            passwordInput.focus();
+            return;
+        }
 
         try {
-            const response = await apiClient.post('/login', {
+            const response = await apiClient.post('/auth/login', {
                 username: username,
                 password: password
             });
@@ -21,39 +37,38 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = response.data;
 
             if (data.success) {
-                // Store the access token in memory (via axios-config.js helper)
-                // Note: Since we are redirecting, this in-memory token will be lost.
-                // However, the browser will store the HttpOnly refresh token cookie.
-                // When index.html loads, it should attempt to refresh the token immediately
-                // or handle the 401 to get a new access token.
-
-                // If you want to persist the access token across page loads without using localStorage,
-                // you typically can't (unless you use sessionStorage which is similar to localStorage).
-                // The standard pattern with HttpOnly cookies is:
-                // 1. Login -> Server sets HttpOnly Refresh Token Cookie + returns Access Token
-                // 2. Redirect to App
-                // 3. App loads -> Access Token is gone (memory cleared)
-                // 4. App makes first API call -> 401 -> Interceptor catches it -> Calls /refresh-token -> Success -> Replays request
-
-                // So we don't strictly need to do anything with data.data.accessToken here *if* we are redirecting immediately,
-                // EXCEPT if we were a Single Page Application (SPA) staying on the same page.
-                // But since we are redirecting to index.html:
+                // Login successful
+                // Save the token if provided (assuming standard structure)
+                const token = data.data?.accessToken || data.accessToken;
+                if (token) {
+                    setAccessToken(token);
+                }
 
                 console.log('Login successful, redirecting...');
                 window.location.href = '/web/index.html';
             } else {
+                // Handle success: false (e.g. 200 OK but logic error)
                 showError(data.message || 'Login failed');
+                // Clear password field on failure
+                passwordInput.value = '';
             }
 
         } catch (error) {
             console.error('Login error:', error);
             let message = 'An error occurred during login.';
-            if (error.response && error.response.data && error.response.data.message) {
-                message = error.response.data.message;
+
+            if (error.response && error.response.data) {
+                // Handle error response from server (e.g. 401, 400)
+                const errData = error.response.data;
+                if (errData.message) {
+                    message = errData.message;
+                }
             } else if (error.message) {
                 message = error.message;
             }
             showError(message);
+            // Clear password field on error
+            passwordInput.value = '';
         }
     });
 

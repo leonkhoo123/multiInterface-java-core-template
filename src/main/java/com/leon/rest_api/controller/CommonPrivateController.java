@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/auth")
-public class CommonAuthController {
-	private static final Logger logger = LoggerFactory.getLogger(CommonAuthController.class);
+@RequestMapping("/api/v1/private")
+public class CommonPrivateController {
+	private static final Logger logger = LoggerFactory.getLogger(CommonPrivateController.class);
 
 	@GetMapping("/test")
 	public ResponseEntity<?> postHandler(){

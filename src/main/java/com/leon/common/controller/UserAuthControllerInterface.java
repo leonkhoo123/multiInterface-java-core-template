@@ -16,7 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1/auth")
 @Tag(name = "Login Api", description = "User login management APIs")
 public interface UserAuthControllerInterface {
 
