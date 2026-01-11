@@ -1,106 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Novel Reader — Smooth Bidirectional</title>
-<link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#222222">
-<style>
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0;
-    background: #ddd8d2;
-    color: #eee;
-    line-height: 1.8;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novel Reader</title>
 
-  }
-  #reader {
-    height: 100vh;
-    overflow-y: auto;
-    width: 100%;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    color: #0a0a0a;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-  }
-  #reader::-webkit-scrollbar {
-  display: none;                /* Chrome / Safari / Edge */
-  }
-  section {
-    padding: 0px;
-    margin: 0px;
-    max-width: 600px;
-    padding-left: 1.8rem;
-    padding-right: 1.4rem;
-    overflow-wrap: anywhere;
-    word-wrap: break-word;
-  }
-  .topbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #222;
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-  .font-controls button {
-    cursor: pointer;
-    margin-left: 5px;
-  }
-  .btm-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 1.1rem;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    background: #5b5753;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    z-index: 100;
-    font-size: small;
-  }
-</style>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #ddd8d2;
+      color: #111;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    #reader {
+      height: 100vh;
+      overflow-y: auto;
+      width: 100%;
+      scrollbar-width: none;
+    }
+
+    #reader::-webkit-scrollbar {
+      display: none;
+    }
+
+    section {
+      max-width: 600px;
+      padding: 0 1.6rem;
+      margin: 0 auto;
+      line-height: 1.8;
+      overflow-wrap: anywhere;
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: #222;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      z-index: 10;
+    }
+
+    .btm-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1.1rem;
+      background: #5b5753;
+      color: #fff;
+      font-size: small;
+      padding: 0 1.5rem;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    #progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: rgba(255,255,255,0.15);
+      width: 0%;
+    }
+
+    #top-spacer,
+    #bottom-spacer {
+      width: 100%;
+    }
+    .font-control{
+      width: 7rem;
+      height: 100%;
+      align-items: center;
+      display: flex;
+      justify-content: space-evenly;
+    }
+  </style>
 </head>
+
 <body>
-<div id="topbar" class="topbar">
-  <div id="back-button" style="display: flex; align-items: center; width: 7rem; cursor: pointer; -webkit-user-select: none; user-select: none;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></div>
-  <div id="novel-name" >Novel Name</div>
-  <div class="font-controls" style="height: 100%;align-content: center;">
-    <button id="font-plus" style="width: 3rem; height: 80%;">A+</button>
-    <button id="font-minus" style="width: 3rem; height: 80%;">A-</button>
+
+<div class="topbar">
+  <div id="back-button" style="cursor:pointer;width:7rem;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left-icon lucide-chevron-left"><path d="m15 18-6-6 6-6"/></svg></div>
+  <div id="novel-name">Novel</div>
+  <div class="font-control">
+    <button id="font-plus" style="width:40%; height:80%">A+</button>
+    <button id="font-minus" style="width:40%; height:80%;">A-</button>
   </div>
 </div>
+
 <div id="reader">
-  <div id="sections" style="max-width:100%"></div>
-  <div style="height: 1.1rem;">___</div>
+  <div id="top-spacer"></div>
+  <div id="sections"></div>
+  <div id="bottom-spacer"></div>
 </div>
-<div id="btm-bar" class="btm-bar">
-  <div id="progress-fill" style="position:absolute; top:0; left:0; height:100%; background:rgba(255,255,255,0.1); width:0%;"></div>
-  <span id="progress-text">0% (0/0)</span>
-</div><script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<div class="btm-bar">
+  <div id="progress-fill"></div>
+  <span id="progress-text">0%</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="/js/axios-config.js"></script>
 <script src="/js/reader.js"></script>
-<script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js');
-        });
-    }
-</script>
+
 </body>
 </html>

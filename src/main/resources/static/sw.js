@@ -1,7 +1,7 @@
 // Update 'v1' to 'v2', 'v3', etc. when you want to force a cache cleanup.
 // With the "Network First" strategy below, users will see new changes immediately
 // even without changing this version, but changing it helps remove unused old files.
-const CACHE_NAME = 'novel-reader-v1';
+const CACHE_NAME = 'novel-reader-v2';
 
 // Install event - skip waiting to activate immediately
 self.addEventListener('install', (event) => {
