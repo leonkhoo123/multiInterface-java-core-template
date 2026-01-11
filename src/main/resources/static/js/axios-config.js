@@ -14,7 +14,7 @@ function getAccessToken() {
 
 // Create an Axios instance with configuration for future authentication
 const apiClient = axios.create({
-    baseURL: 'http://localhost:8080/api/v1',
+    baseURL: '/api/v1',
     withCredentials: true, // Essential for handling httpOnly refresh tokens in cookies
     headers: {
         'Content-Type': 'application/json'
