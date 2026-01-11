@@ -2,7 +2,7 @@ package com.leon.common.dto.response;
 
 import java.util.Set;
 
-public class LoginResponse implements LoginResponseInterface {
+public class LoginResponse {
 
     private String accessToken;
     private String refreshToken; // Note: Controller will null this before sending if using HttpOnly cookies
@@ -12,6 +12,7 @@ public class LoginResponse implements LoginResponseInterface {
     private String username;
     private String email;
     private Set<String> roles;
+    private String deviceId;
 
     // Default Constructor
     public LoginResponse() {
@@ -21,7 +22,7 @@ public class LoginResponse implements LoginResponseInterface {
     // Full Constructor
     public LoginResponse(String accessToken, String refreshToken, String tokenType,
                          long expiresIn, Long id, String username,
-                         String email, Set<String> roles) {
+                         String email, Set<String> roles, String deviceId) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.tokenType = tokenType != null ? tokenType : "Bearer";
@@ -30,6 +31,8 @@ public class LoginResponse implements LoginResponseInterface {
         this.username = username;
         this.email = email;
         this.roles = roles;
+        this.deviceId = deviceId;
+
     }
 
     // Getters and Setters
@@ -56,4 +59,12 @@ public class LoginResponse implements LoginResponseInterface {
 
     public Set<String> getRoles() { return roles; }
     public void setRoles(Set<String> roles) { this.roles = roles; }
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
+    }
 }

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
         @Index(name = "idx_user_id", columnList = "user_id")
 })
 
-public class RefreshToken implements RefreshTokenInterface {
+public class RefreshToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,11 +23,8 @@ public class RefreshToken implements RefreshTokenInterface {
     @Column(name = "token_hash", nullable = false, unique = true, length = 64)
     private String tokenHash;
 
-    @Column(name = "device_fingerprint", length = 128)
-    private String deviceFingerprint;
-
-    @Column(name = "device_name")
-    private String deviceName;
+    @Column(name = "device_id", length = 128)
+    private String deviceId;
 
     @Column(name = "user_agent", columnDefinition = "TEXT")
     private String userAgent;
@@ -74,6 +71,10 @@ public class RefreshToken implements RefreshTokenInterface {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Long getUserId() {
         return userId;
     }
@@ -90,20 +91,12 @@ public class RefreshToken implements RefreshTokenInterface {
         this.tokenHash = tokenHash;
     }
 
-    public String getDeviceFingerprint() {
-        return deviceFingerprint;
+    public String getDeviceId() {
+        return deviceId;
     }
 
-    public void setDeviceFingerprint(String deviceFingerprint) {
-        this.deviceFingerprint = deviceFingerprint;
-    }
-
-    public String getDeviceName() {
-        return deviceName;
-    }
-
-    public void setDeviceName(String deviceName) {
-        this.deviceName = deviceName;
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
     }
 
     public String getUserAgent() {

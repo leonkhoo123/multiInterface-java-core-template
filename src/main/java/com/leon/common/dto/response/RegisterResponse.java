@@ -2,7 +2,7 @@ package com.leon.common.dto.response;
 
 import java.time.LocalDateTime;
 
-public class RegisterResponse implements RegisterResponseInterface{
+public class RegisterResponse {
     private String username;
     private String email;
     private LocalDateTime registeredAt;

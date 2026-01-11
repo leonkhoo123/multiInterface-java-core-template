@@ -1,7 +1,7 @@
 package com.leon.common.repository;
 
-import com.leon.common.entities.RefreshTokenInterface;
-import com.leon.common.entities.UserInterface;
+import com.leon.common.entities.RefreshToken;
+import com.leon.common.entities.User;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,15 +9,16 @@ import java.util.Optional;
 
 public interface RefreshTokenStore {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void revokeExpiredToken(RefreshTokenInterface refreshToken);
+    public void revokeExpiredToken(RefreshToken refreshToken);
 
-    public void saveRefreshToken(UserInterface user, String refreshToken);
+    public void saveRefreshToken(User user, String refreshToken, String userAgent, String ipAddress, String deviceId);
 
-    public void logoutUser(RefreshTokenInterface refreshToken);
+    public void logoutUser(RefreshToken refreshToken);
     public void revokeAllRefreshToken(String message, long id);
 
-    public Optional<RefreshTokenInterface> findByTokenHash(String hashedToken);
+    public void revokeRefreshTokenByDeviceId(String message, long id, String deviceId);
 
-    public void save(RefreshTokenInterface refreshToken);
+    public Optional<RefreshToken> findByTokenHashAndDeviceId(String hashedToken, String deviceId);
+
+    public void save(RefreshToken refreshToken);
 }
-

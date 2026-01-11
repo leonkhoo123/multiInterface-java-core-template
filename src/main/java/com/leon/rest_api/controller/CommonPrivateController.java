@@ -1,5 +1,6 @@
 package com.leon.rest_api.controller;
 
+import com.leon.common.dto.response.CommonResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +14,8 @@ public class CommonPrivateController {
 	private static final Logger logger = LoggerFactory.getLogger(CommonPrivateController.class);
 
 	@GetMapping("/test")
-	public ResponseEntity<?> postHandler(){
-		return ResponseEntity.ok("auth OK");
+	public ResponseEntity<CommonResponse<String>> postHandler(){
+		return ResponseEntity.ok(CommonResponse.success("SESSION_ALIVE", "Session Still Alive!"));
 	}
 
 }

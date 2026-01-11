@@ -1,17 +1,18 @@
 package com.leon.common.repository;
-import com.leon.common.entities.UserInterface;
+
+import com.leon.common.entities.User;
 
 import java.util.Optional;
 
 public interface UserStore {
 
-    Optional<UserInterface> findByUsername(String username);
+    Optional<User> findByUsername(String username);
 
-    Optional<UserInterface> findById(long id);
+    Optional<User> findById(long id);
 
     Boolean existsByUsername(String username);
 
     Boolean existsByEmail(String email);
 
-    void save(UserInterface user);
+    void save(User user);
 }

@@ -1,7 +1,6 @@
 package com.leon.rest_api.repository.store;
 
 import com.leon.common.entities.User;
-import com.leon.common.entities.UserInterface;
 import com.leon.common.repository.UserDetailStore;
 import com.leon.rest_api.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,7 +22,7 @@ public class JpaUserDetailStore implements UserDetailStore {
         return userRepository.findByUsername(username).map(this::toUserDetails);
     }
 
-    private UserDetails toUserDetails(UserInterface user) {
+    private UserDetails toUserDetails(User user) {
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())
                 .password(user.getPassword())

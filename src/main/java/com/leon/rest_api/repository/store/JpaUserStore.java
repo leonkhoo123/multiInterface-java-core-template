@@ -1,7 +1,6 @@
 package com.leon.rest_api.repository.store;
 
 import com.leon.common.entities.User;
-import com.leon.common.entities.UserInterface;
 import com.leon.common.repository.UserStore;
 import com.leon.rest_api.repository.UserRepository;
 import org.springframework.stereotype.Component;
@@ -17,12 +16,12 @@ public class JpaUserStore implements UserStore {
     }
 
     @Override
-    public Optional<UserInterface> findByUsername(String username) {
+    public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
     @Override
-    public Optional<UserInterface> findById(long id) {
+    public Optional<User> findById(long id) {
         return userRepository.findById(id);
     }
 
@@ -37,7 +36,7 @@ public class JpaUserStore implements UserStore {
     }
 
     @Override
-    public void save(UserInterface user) {
-        userRepository.save((User) user);
+    public void save(User user) {
+        userRepository.save(user);
     }
 }

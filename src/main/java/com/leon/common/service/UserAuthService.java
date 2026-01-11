@@ -1,20 +1,18 @@
 package com.leon.common.service;
 
 import com.leon.common.dto.TokenTuple;
-import com.leon.common.dto.request.LoginRequestInterface;
-import com.leon.common.dto.request.RegisterRequestInterface;
+import com.leon.common.dto.request.LoginRequest;
+import com.leon.common.dto.request.RegisterRequest;
 import com.leon.common.dto.response.LoginResponse;
-import com.leon.common.dto.response.LoginResponseInterface;
 import com.leon.common.dto.response.LogoutResponse;
 import com.leon.common.dto.response.RegisterResponse;
 import com.leon.common.entities.User;
-import com.leon.common.entities.UserInterface;
 import com.leon.common.exception.UserAlreadyExistsException;
 import com.leon.common.exception.UserNotFoundException;
 import com.leon.common.repository.RefreshTokenStore;
 import com.leon.common.repository.UserStore;
 import com.leon.common.security.JwtTokenUtils;
-import com.leon.common.security.RefreshTokenUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,13 +20,13 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -53,7 +51,7 @@ public class UserAuthService {
     }
 
     @Transactional
-    public LoginResponseInterface login(LoginRequestInterface request) {
+    public LoginResponse login(LoginRequest request) {
         // Authenticate user
         // This will throw BadCredentialsException if password fails, which should be handled by GlobalExceptionHandler to return 401
         try{
@@ -67,14 +65,25 @@ public class UserAuthService {
 
             // Get user details from the Authentication object (avoids a second DB query)
             // This assumes your UserDetailsService returns your custom User entity or you can cast the principal
-            UserInterface user = userStore.findByUsername(request.getUsername())
+            User user = userStore.findByUsername(request.getUsername())
                     .orElseThrow(()-> new UserNotFoundException("Username Not Found"));
 
             // Generate tokens
             String accessToken = jwtTokenUtils.generateAccessToken(authentication);
             String refreshToken = jwtTokenUtils.generateRefreshToken(authentication);
+            
+            // Get User Agent and IP Address
+            String userAgent = null;
+            String ipAddress = null;
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                HttpServletRequest httpRequest = attributes.getRequest();
+                userAgent = httpRequest.getHeader("User-Agent");
+                ipAddress = httpRequest.getRemoteAddr();
+            }
+
             // Save refresh token
-            refreshTokenStore.saveRefreshToken(user, refreshToken);
+            refreshTokenStore.saveRefreshToken(user, refreshToken, userAgent, ipAddress, request.getDeviceId());
 
             // Update last login
             user.setLastLogin(LocalDateTime.now());
@@ -90,7 +99,8 @@ public class UserAuthService {
                     user.getId(),
                     user.getUsername(),
                     user.getEmail(),
-                    user.getRoles()
+                    user.getRoles(),
+                    request.getDeviceId()
             );
         } catch (BadCredentialsException e){
             log.info("Credential error ",e);
@@ -105,17 +115,16 @@ public class UserAuthService {
 
         // 2. Delete the Refresh Token from DB
         String username = jwtTokenUtils.getUsernameFromToken(tokens.getAccessToken());
-        UserInterface user = userStore.findByUsername(username)
+        User user = userStore.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
-        // logout from everywhere first
-        // TODO : add multi device support and only logout from one device
-        refreshTokenStore.revokeAllRefreshToken("logout", user.getId());
+        // logout only for that deviceId
+        refreshTokenStore.revokeRefreshTokenByDeviceId("logout", user.getId(),tokens.getDeviceId());
         SecurityContextHolder.clearContext();
         return new LogoutResponse(username, LocalDateTime.now());
     }
 
     @Transactional
-    public RegisterResponse register(RegisterRequestInterface request) {
+    public RegisterResponse register(RegisterRequest request) {
         log.info("Attempting to register user: {}", request.getUsername());
 
         if (userStore.existsByUsername(request.getUsername())) {

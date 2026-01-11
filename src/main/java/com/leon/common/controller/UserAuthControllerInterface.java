@@ -3,7 +3,6 @@ package com.leon.common.controller;
 import com.leon.common.dto.request.LoginRequest;
 import com.leon.common.dto.response.CommonResponse;
 import com.leon.common.dto.response.LoginResponse;
-import com.leon.common.dto.response.LoginResponseInterface;
 import com.leon.common.dto.response.LogoutResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -51,7 +50,7 @@ public interface UserAuthControllerInterface {
             )
     })
     @PostMapping("/login")
-    ResponseEntity<CommonResponse<LoginResponseInterface>> login(
+    ResponseEntity<CommonResponse<LoginResponse>> login(
             LoginRequest request
     );
 

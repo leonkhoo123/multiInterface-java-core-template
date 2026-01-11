@@ -1,10 +1,8 @@
 package com.leon.common.dto.response;
 
-import com.leon.common.dto.request.LogoutRequestInterface;
-
 import java.time.LocalDateTime;
 
-public class LogoutResponse implements LogoutResponseInterface {
+public class LogoutResponse {
     String username;
     LocalDateTime logoutTime;
 

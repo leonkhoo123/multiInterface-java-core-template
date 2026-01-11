@@ -41,6 +41,16 @@ public class RefreshTokenUtils {
                 .build();
     }
 
+    public ResponseCookie buildDeviceIdCookie(String deviceId, long maxAge) {
+        return ResponseCookie.from(tokenProperties.getDeviceId().getCookieName(), deviceId != null ? deviceId : "")
+                .httpOnly(true)
+                .secure(appProperties.isSecureCookie()) // Must be true in prod for HTTPS
+                .path("/")
+                .maxAge(maxAge)
+                .sameSite("Strict") // Protects against CSRF
+                .build();
+    }
+
     public String hashRefreshToken(String token) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
@@ -69,6 +79,15 @@ public class RefreshTokenUtils {
         if (request.getCookies() == null) return null;
         return Arrays.stream(request.getCookies())
                 .filter(cookie -> tokenProperties.getRefreshToken().getCookieName().equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public String extractDeviceIdFromCookie(HttpServletRequest request) {
+        if (request.getCookies() == null) return null;
+        return Arrays.stream(request.getCookies())
+                .filter(cookie -> tokenProperties.getDeviceId().getCookieName().equals(cookie.getName()))
                 .map(Cookie::getValue)
                 .findFirst()
                 .orElse(null);

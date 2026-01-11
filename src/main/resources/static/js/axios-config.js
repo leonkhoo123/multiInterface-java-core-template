@@ -59,7 +59,7 @@ apiClient.interceptors.response.use(
         const originalRequest = error.config;
 
         // Prevent infinite loops for login or refresh endpoints
-        if (originalRequest.url.includes('/login') || originalRequest.url.includes('/refresh')) {
+        if (originalRequest.url.includes('/auth/login') || originalRequest.url.includes('/auth/refresh')) {
             return Promise.reject(error);
         }
 

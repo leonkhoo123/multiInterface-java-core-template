@@ -1,21 +1,23 @@
 package com.leon.common.dto.response;
 
-public class RefreshTokenResponse implements RefreshTokenResponseInterface{
+public class RefreshTokenResponse {
 
     private String accessToken;
     private String tokenType;
     private long expiresIn;
-
+    private String deviceId;
     // Standard Default Constructor
     public RefreshTokenResponse() {
         this.tokenType = "Bearer"; // Default value
     }
 
     // All-Arguments Constructor
-    public RefreshTokenResponse(String accessToken, String tokenType, long expiresIn) {
+    public RefreshTokenResponse(String accessToken, String tokenType, long expiresIn, String deviceId) {
         this.accessToken = accessToken;
         this.tokenType = tokenType != null ? tokenType : "Bearer";
         this.expiresIn = expiresIn;
+        this.deviceId = deviceId;
+
     }
 
     // Getters
@@ -42,36 +44,5 @@ public class RefreshTokenResponse implements RefreshTokenResponseInterface{
 
     public void setExpiresIn(long expiresIn) {
         this.expiresIn = expiresIn;
-    }
-
-    // Static Builder Method
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    // Manual Builder Inner Class
-    public static class Builder {
-        private String accessToken;
-        private String tokenType = "Bearer";
-        private long expiresIn;
-
-        public Builder accessToken(String accessToken) {
-            this.accessToken = accessToken;
-            return this;
-        }
-
-        public Builder tokenType(String tokenType) {
-            this.tokenType = tokenType;
-            return this;
-        }
-
-        public Builder expiresIn(long expiresIn) {
-            this.expiresIn = expiresIn;
-            return this;
-        }
-
-        public RefreshTokenResponse build() {
-            return new RefreshTokenResponse(accessToken, tokenType, expiresIn);
-        }
     }
 }

@@ -1,6 +1,6 @@
 package com.leon.common.dto.request;
 
-public class LogoutRequest implements LogoutRequestInterface {
+public class LogoutRequest {
     private String username;
     private String accessToken;
     private String refreshToken;

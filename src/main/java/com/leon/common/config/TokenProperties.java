@@ -14,6 +14,7 @@ public class TokenProperties {
 
     private AccessToken accessToken = new AccessToken();
     private RefreshToken refreshToken = new RefreshToken();
+    private DeviceId deviceId = new DeviceId();
 
     public AccessToken getAccessToken() {
         return accessToken;
@@ -29,6 +30,14 @@ public class TokenProperties {
 
     public void setRefreshToken(RefreshToken refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    public DeviceId getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(DeviceId deviceId) {
+        this.deviceId = deviceId;
     }
 
     @PostConstruct
@@ -55,6 +64,10 @@ public class TokenProperties {
                 refreshToken.getExpiration(),
                 refreshToken.getCookieName(),
                 refreshToken.getMaxAge());
+
+        logger.info("TokenProperties loaded: deviceId cookieName={}, deviceId.maxAge={}",
+                deviceId.getCookieName(),
+                deviceId.getMaxAge());
     }
 
     public static class AccessToken {
@@ -115,6 +128,27 @@ public class TokenProperties {
 
         public void setPapper(String papper) {
             this.papper = papper;
+        }
+    }
+
+    public static class DeviceId {
+        private String cookieName = "device_id";
+        private int maxAge = 2592000; // Default 1 year
+
+        public String getCookieName() {
+            return cookieName;
+        }
+
+        public void setCookieName(String cookieName) {
+            this.cookieName = cookieName;
+        }
+
+        public int getMaxAge() {
+            return maxAge;
+        }
+
+        public void setMaxAge(int maxAge) {
+            this.maxAge = maxAge;
         }
     }
 }

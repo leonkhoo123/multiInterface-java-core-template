@@ -1,6 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
+    checkSession();
+
     const loginForm = document.getElementById('login-form');
     const errorMsg = document.getElementById('error-message');
+
+    async function checkSession() {
+        try {
+            const response = await apiClient.get('/private/test', {});
+            const data = response.data;
+            if (data.success && data.message === 'SESSION_ALIVE') {
+                window.location.href = '/web/index.html';
+            }
+        } catch (error) {
+            // User is not logged in or token expired, stay on login page
+        }
+    }
 
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -31,7 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await apiClient.post('/auth/login', {
                 username: username,
-                password: password
+                password: password,
+                deviceId: crypto.randomUUID()
             });
 
             const data = response.data;
