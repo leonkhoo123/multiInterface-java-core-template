@@ -49,7 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/api-docs/**", "/swagger-ui/**").permitAll()
 
                         // Special handling for static resources
-                        .requestMatchers("/favicon.ico","/manifest.json","/sw.js","/icon.png").permitAll()
+                        .requestMatchers("/favicon.ico","/manifest.json","/sw.js","/novel_logo-removebg-preview.png").permitAll()
 
                         // Static + internal (k8s probes)
                         .requestMatchers("/web/**", "/js/**", "/internal/**").permitAll()
