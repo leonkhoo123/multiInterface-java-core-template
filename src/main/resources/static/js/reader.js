@@ -53,9 +53,9 @@ class NovelReader {
     static ESTIMATED_SECTION_HEIGHT = 800;
     static SCROLL_STOP_DELAY = 150;
     static PROGRESS_UPDATE_DELAY = 1000;
-    static MAX_SPACER_HEIGHT = 2000000;
+    static MAX_SPACER_HEIGHT = 200000;
     // A more conservative hard cap on the total spacer height for maximum mobile compatibility.
-    static TOTAL_SPACER_CAP = 6000000; // 6 million pixels
+    static TOTAL_SPACER_CAP = 200000; // 200k pixels
 
     constructor(novelId) {
         this.novelId = novelId;
@@ -91,6 +91,12 @@ class NovelReader {
             });
             this.readerEl.addEventListener("scroll", this.onScroll.bind(this));
             document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+
+            // Auto-retry loading when internet connection is restored.
+            window.addEventListener('online', () => {
+                console.log("Network online. Retrying content load.");
+                this.handleScrollStop();
+            });
 
             const progressRes = await apiClient.get(`private/novel/getUserNovelProgress/${this.novelId}`);
             const { totalSeq, readUntil, novelName } = progressRes.data.data;
@@ -176,7 +182,8 @@ class NovelReader {
             return html;
         } catch (error) {
             console.error(`Failed to fetch section ${index}:`, error);
-            return `<section data-index="${index}" class="error">Failed to load content.</section>`;
+            // Return null on failure so no error section is created.
+            return null;
         }
     }
 
@@ -251,6 +258,9 @@ class NovelReader {
         const htmls = await Promise.all(promises);
 
         for (const html of htmls) {
+            // Skip if fetch failed (null)
+            if (!html) continue;
+
             const temp = document.createElement("div");
             temp.innerHTML = html;
             const sectionEl = temp.firstElementChild;
