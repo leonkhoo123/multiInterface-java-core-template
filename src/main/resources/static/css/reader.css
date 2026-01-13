@@ -1,0 +1,88 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #ddd8d2;
+  color: #111;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+#reader {
+  height: 100vh;
+  overflow-y: auto;
+  width: 100%;
+  scrollbar-width: none;
+}
+
+#reader::-webkit-scrollbar {
+  display: none;
+}
+
+section {
+  max-width: 600px;
+  padding: 0 1.6rem;
+  margin: 0 auto;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: #222;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  z-index: 10;
+}
+
+.btm-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1.1rem;
+  background: #5b5753;
+  color: #fff;
+  font-size: small;
+  padding: 0 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+#progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: rgba(255,255,255,0.15);
+  width: 0%;
+}
+
+#top-spacer-container > div,
+#bottom-spacer {
+  width: 100%;
+}
+.font-control{
+  width: 7rem;
+  height: 100%;
+  align-items: center;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+#back-button {
+  cursor: pointer;
+  width: 7rem;
+}
+
+#font-plus, #font-minus {
+  width: 40%;
+  height: 80%;
+}

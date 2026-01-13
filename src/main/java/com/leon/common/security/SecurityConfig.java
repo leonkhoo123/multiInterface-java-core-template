@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/favicon.ico","/manifest.json","/sw.js","/novel_logo-removebg-preview.png").permitAll()
 
                         // Static + internal (k8s probes)
-                        .requestMatchers("/web/**", "/js/**", "/internal/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/web/**", "/internal/**").permitAll()
 
                         // Auth endpoints
                         .requestMatchers("/api/v1/auth/**").permitAll()

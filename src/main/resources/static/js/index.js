@@ -59,7 +59,7 @@ async function loadNovels() {
                 </div>
 
                 <div class="last-read">
-                    ${lastReadDate ? `🕒 Last read: ${lastReadDate}` : '✨ <span style="color:#3498db">New Novel</span>'}
+                    ${lastReadDate ? `🕒 Last read: ${lastReadDate}` : '✨ <span class="new-novel">New Novel</span>'}
                 </div>
             </div>
         `}).join('');
