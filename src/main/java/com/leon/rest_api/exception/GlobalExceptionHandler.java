@@ -83,6 +83,19 @@ public class GlobalExceptionHandler implements GlobalExceptionHandlerInterface {
                 ));
     }
 
+    @ExceptionHandler(InvalidChunkRequestException.class)
+    public ResponseEntity<CommonResponse<Void>> handleInvalidChunkRequestException(
+            InvalidChunkRequestException e,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(CommonResponse.failure(
+                        e.getMessage(),
+                        ErrorCode.INVALID_CHUNK_REQUEST.name()
+                ));
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<CommonResponse<Void>> handleBadCredentialsException(
             Exception e, HttpServletRequest request

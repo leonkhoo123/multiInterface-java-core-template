@@ -68,12 +68,13 @@ public class UserAuthController implements UserAuthControllerInterface {
         // Clear refresh token cookie
         ResponseCookie refreshTokenCookie = refreshTokenUtils.buildRefreshTokenCookie("", 0);
         // Clear device id cookie
-        ResponseCookie deviceIdCookie = refreshTokenUtils.buildDeviceIdCookie("", 0);
+        // (do not clear it, so will be able to differentiate new device login, not sure regulation allow or not)
+//        ResponseCookie deviceIdCookie = refreshTokenUtils.buildDeviceIdCookie("", 0);
 
         log.info("Logout successful");
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, deviceIdCookie.toString())
+//                .header(HttpHeaders.SET_COOKIE, deviceIdCookie.toString())
                 .body(CommonResponse.success("Logout successful", logoutResponse));
     }
 
